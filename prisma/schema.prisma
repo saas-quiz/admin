@@ -24,11 +24,48 @@ model User {
   name     String
   email    String @unique
   password String
-  role     Role
+  role     Role[]
 
-  quizzes Quiz[]
+  quizzes ParticipantQuizzes[] // student quizzes
+  // requests Request[] // student requests to join quiz
 
-  @@map("users")
+  adminOf  Group[]       @relation("GroupAdmin")
+  memberOf GroupMember[]
+}
+
+model Group {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  desc String
+
+  quizzes Quiz[]        @relation("GroupQuizzes")
+  adminId String        @db.ObjectId
+  admin   User          @relation("GroupAdmin", fields: [adminId], references: [id])
+  members GroupMember[]
+
+  ParticipantQuizzes ParticipantQuizzes[]
+}
+
+model GroupMember {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String @db.ObjectId
+  groupId String @db.ObjectId
+
+  Group Group @relation(fields: [groupId], references: [id])
+  User  User  @relation(fields: [userId], references: [id])
+
+  @@unique([userId, groupId])
+}
+
+model ParticipantQuizzes {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  answers String[]
+  userId  String   @db.ObjectId
+  quizId  String   @db.ObjectId
+  groupId String   @db.ObjectId
+  User    User     @relation(fields: [userId], references: [id])
+  Quiz    Quiz     @relation(fields: [quizId], references: [id])
+  Group   Group    @relation(fields: [groupId], references: [id])
 }
 
 model Quiz {
@@ -37,8 +74,9 @@ model Quiz {
   questions Question[]
   author    String
 
-  userId String? @db.ObjectId
-  User   User?   @relation(fields: [userId], references: [id])
+  participants ParticipantQuizzes[]
+  groupId      String               @db.ObjectId
+  group        Group                @relation("GroupQuizzes", fields: [groupId], references: [id])
 
   @@map("quizzes")
 }
@@ -49,18 +87,19 @@ model Question {
   options   Option[]
   answerKey String
 
-  Quiz   Quiz   @relation(fields: [quizId], references: [id])
   quizId String @db.ObjectId
+  quiz   Quiz   @relation(fields: [quizId], references: [id])
 
   @@map("questions")
 }
 
 model Option {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  key        String
-  value      String
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  key   String
+  value String
+
   questionId String   @db.ObjectId
-  Question   Question @relation(fields: [questionId], references: [id])
+  question   Question @relation(fields: [questionId], references: [id])
 
   @@map("options")
 }
