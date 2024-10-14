@@ -1,6 +1,9 @@
-import { Button } from "@/components/ui/button";
+"use client";
 
-export default function Home() {
+import { Button } from "@/components/ui/button";
+import withAuth from "@/lib/withAuth";
+
+function Home() {
   return (
     <div>
       <h1 className="text-3xl font-thin">Hello world!</h1>
@@ -15,3 +18,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default withAuth(Home);

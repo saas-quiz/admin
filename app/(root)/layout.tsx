@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Fonts from "./fonts/outfit";
-import "./globals.css";
+import Fonts from "../fonts/outfit";
+import "../globals.css";
 
 export const metadata: Metadata = {
   title: "Quiz App",
