@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Fonts from "../fonts/outfit";
 import "../globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Quiz App",
@@ -18,6 +19,7 @@ export default function RootLayout({
         className={`${Fonts.Light} ${Fonts.ExtraLight} ${Fonts.Thin} ${Fonts.Medium} ${Fonts.Regular}  ${Fonts.SemiBold} ${Fonts.Bold} ${Fonts.ExtraBold} antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );

@@ -7,15 +7,15 @@ import React, { ReactElement, useEffect } from "react";
 const withAuth = (WrappedComponent: React.ComponentType<any>) => {
   const AuthHOC = (props: any): ReactElement => {
     const router = useRouter();
-    const { isAuthenticated, loading } = useAuth();
+    const { isAuthenticated, isloading } = useAuth();
 
     useEffect(() => {
-      if (!loading && !isAuthenticated) {
+      if (!isloading && !isAuthenticated) {
         router.push("/sign-in");
       }
-    }, [loading, isAuthenticated, router]);
+    }, [isloading, isAuthenticated, router]);
 
-    if (loading || !isAuthenticated) {
+    if (isloading || !isAuthenticated) {
       return <div>loading...</div>;
     }
 
