@@ -1,25 +1,16 @@
-"use client";
-
-import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
-import React, { ReactElement, useEffect } from "react";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import React, { ReactElement } from "react";
 
 const withAuth = (WrappedComponent: React.ComponentType<any>) => {
-  const AuthHOC = (props: any): ReactElement => {
-    const router = useRouter();
-    const { isAuthenticated, isloading } = useAuth();
+  const AuthHOC = async (props: any): Promise<ReactElement> => {
+    const session = await auth();
+    if (!session) return redirect("/sign-in");
 
-    useEffect(() => {
-      if (!isloading && !isAuthenticated) {
-        router.push("/sign-in");
-      }
-    }, [isloading, isAuthenticated, router]);
+    // @ts-ignore
+    if (!session.user?.isOnBoarded) return redirect("/on-boarding");
 
-    if (isloading || !isAuthenticated) {
-      return <div>loading...</div>;
-    }
-
-    return <WrappedComponent {...props} />;
+    return <WrappedComponent {...props} session={session} />;
   };
 
   return AuthHOC;

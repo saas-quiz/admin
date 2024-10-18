@@ -2,13 +2,12 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { generateTokens, hashPassword } from "@/lib/utils";
 
 /**
  * Onboarding
  * PUT /api/auth/onboarding
  * body: { name, email }
- * action: "update user", "generate tokens"
+ * action: "update user"
  */
 export async function PUT(req: NextRequest) {
   if (req.method === "PUT") {
@@ -30,28 +29,7 @@ export async function PUT(req: NextRequest) {
         data: { name, isOnBoarded: true },
       });
 
-      // Create JWT token
-      const secret = process.env.JWT_SECRET as string;
-      const tokens = generateTokens({ id: user.id, email: user.email }, secret);
-
-      user.password = null;
-      const response = NextResponse.json({ ok: true, message: "Sign in successful", data: user }, { status: 200 });
-
-      // Set cookies
-      response.cookies.set("auth_token", tokens.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-        maxAge: 60 * 60,
-        sameSite: "strict",
-        path: "/",
-      });
-      response.cookies.set("refresh_token", tokens.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-        maxAge: 60 * 60 * 24 * 7,
-        sameSite: "strict",
-        path: "/",
-      });
+      const response = NextResponse.json({ ok: true, message: "Sign in successful", data: updatedUser }, { status: 200 });
 
       return response;
     } catch (error: any) {

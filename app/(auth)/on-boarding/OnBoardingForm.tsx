@@ -1,3 +1,5 @@
+"use client";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React from "react";
@@ -5,8 +7,9 @@ import { CgSpinner } from "react-icons/cg";
 import { Button } from "@/components/ui/button";
 import { error, success } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { Session } from "next-auth";
 
-const OnBoarding = ({ data }: any) => {
+const OnBoardingForm = ({ session }: { session: Session }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [name, setName] = React.useState<string>("");
@@ -18,7 +21,7 @@ const OnBoarding = ({ data }: any) => {
     const res = await fetch("/api/auth/onboarding", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email: data.email }),
+      body: JSON.stringify({ name, email: session?.user?.email }),
     }).then((res) => res.json());
     setIsLoading(false);
 
@@ -62,7 +65,7 @@ const OnBoarding = ({ data }: any) => {
               id="email"
               placeholder="name@example.com"
               type="email"
-              value={data.email}
+              value={session?.user?.email ?? ""}
               autoCapitalize="none"
               autoComplete="name"
               autoCorrect="off"
@@ -80,4 +83,4 @@ const OnBoarding = ({ data }: any) => {
   );
 };
 
-export default OnBoarding;
+export default OnBoardingForm;

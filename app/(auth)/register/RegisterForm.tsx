@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -5,14 +7,15 @@ import { error, success } from "@/lib/utils";
 import React from "react";
 import { CgEye, CgSpinner } from "react-icons/cg";
 import { FcGoogle } from "react-icons/fc";
-import { FormProps } from "./user-auth-form";
 import { EyeNoneIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
-import { signIn, getSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
 
-const EmailForm = ({ changeState }: FormProps) => {
+const RegisterForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [name, setName] = React.useState<string>("");
   const [email, setEmail] = React.useState<string>("");
   const [password, setPassword] = React.useState<string>("");
   const [showPassword, setShowPassword] = React.useState(false);
@@ -21,32 +24,43 @@ const EmailForm = ({ changeState }: FormProps) => {
     event.preventDefault();
     setIsLoading(true);
 
-    const res = await fetch("/api/auth/signin", {
+    const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ name, email, password }),
     }).then((res) => res.json());
     setIsLoading(false);
 
     if (!res.ok) return error(res.error);
 
-    if (!res.data.isOnBoarded) {
-      success(res.message);
-      return changeState({ element: "ON_BOARDING_FORM", data: { email } });
-    }
-
     success(res.message);
-    router.push("/");
+    router.push("/sign-in");
   }
 
   return (
     <>
-      <div className="flex flex-col space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Signin or Register</h1>
-        <p className="text-sm text-muted-foreground">Enter your email below to sign-in or create your account</p>
+      <div className="flex flex-col space-y-2 text-center py-5">
+        <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
+        <p className="text-sm text-muted-foreground">Enter your credentials below to register</p>
       </div>
       <form onSubmit={onSubmit}>
         <div className="grid gap-2">
+          <div className="grid gap-1">
+            <Label className="font-normal" htmlFor="name">
+              Name
+            </Label>
+            <Input
+              id="name"
+              placeholder="name@example.com"
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              autoCapitalize="none"
+              autoComplete="name"
+              autoCorrect="off"
+              disabled={isLoading}
+            />
+          </div>
           <div className="grid gap-1">
             <Label className="font-normal" htmlFor="email">
               Email
@@ -92,7 +106,12 @@ const EmailForm = ({ changeState }: FormProps) => {
           </Button>
         </div>
       </form>
-      {/* <div className="relative">
+      <div className="flex justify-between pt-2 font-medium">
+        <Link href="/sign-in" className="text-blue-500 text-sm">
+          Already have an account? Sign In
+        </Link>
+      </div>
+      <div className="relative my-4">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
         </div>
@@ -110,9 +129,9 @@ const EmailForm = ({ changeState }: FormProps) => {
         }}
       >
         {isLoading ? <CgSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FcGoogle className="mr-2 h-4 w-4" />} Google
-      </Button> */}
+      </Button>
     </>
   );
 };
 
-export default EmailForm;
+export default RegisterForm;
