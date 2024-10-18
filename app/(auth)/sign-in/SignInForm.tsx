@@ -67,9 +67,14 @@ const SignInForm = () => {
               disabled={isLoading}
             />
           </div>
-          <Label className="font-normal" htmlFor="password">
-            Password
-          </Label>
+          <div className="flex justify-between items-center mt-1">
+            <Label className="font-normal" htmlFor="password">
+              Password
+            </Label>
+            <Link href="/forgot-password" className="font-medium text-sm underline">
+              Forgot Password?
+            </Link>
+          </div>
           <div className="relative">
             <Input
               id="password"
@@ -90,20 +95,13 @@ const SignInForm = () => {
               {showPassword ? <CgEye /> : <EyeNoneIcon />}
             </span>
           </div>
+
           <Button disabled={email === "" || password === "" || isLoading} className="mt-2">
             {isLoading && <CgSpinner className="mr-2 h-4 w-4 animate-spin" />}
             Continue
           </Button>
         </div>
       </form>
-      <div className="flex justify-between pt-2 font-medium text-sm">
-        <Link href="/forgot-password" className="text-red-400">
-          Forgot Password?
-        </Link>
-        <Link href="/register" className="text-blue-500">
-          Create an account.
-        </Link>
-      </div>
       <div className="relative my-4">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
@@ -133,6 +131,13 @@ const SignInForm = () => {
           {isLoading ? <CgSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FcGoogle className="mr-2 h-4 w-4" />} Google
         </Button>
       )}
+
+      <div className="text-center text-[16px] my-2">
+        <span className="text-muted-foreground">Don&apos;t have an account?</span>{" "}
+        <Link href="/register" className="underline font-medium">
+          Sign Up
+        </Link>
+      </div>
     </>
   );
 };

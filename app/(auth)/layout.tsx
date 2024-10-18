@@ -20,7 +20,7 @@ export default function RootLayout({
       <body
         className={`${Fonts.Light} ${Fonts.ExtraLight} ${Fonts.Thin} ${Fonts.Medium} ${Fonts.Regular}  ${Fonts.SemiBold} ${Fonts.Bold} ${Fonts.ExtraBold} antialiased`}
       >
-        <div className="relative min-h-screen flex-col items-center justify-center grid lg:grid-cols-2 lg:px-0">
+        <div className="relative min-h-screen flex-col items-center grid lg:grid-cols-2 lg:px-0">
           <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
             <div className="absolute inset-0 bg-zinc-900" />
             <div className="relative z-20 flex items-center text-lg font-medium">
@@ -38,9 +38,9 @@ export default function RootLayout({
           </div>
 
           <div className="p-2">
-            <div className="mx-auto flex w-full flex-col justify-center md:w-[450px]">
+            <div className="mx-auto flex w-full flex-col px-5 sm:w-[400px]">
               {children}
-              <p className="px-8 text-center text-sm text-muted-foreground">
+              <p className="px-8 text-center text-xs text-muted-foreground">
                 By clicking continue, you agree to our{" "}
                 <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
                   Terms of Service

@@ -41,7 +41,7 @@ const RegisterForm = () => {
     <>
       <div className="flex flex-col space-y-2 text-center py-5">
         <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
-        <p className="text-sm text-muted-foreground">Enter your credentials below to register</p>
+        <p className="text-sm text-muted-foreground">Enter your details below to register</p>
       </div>
       <form onSubmit={onSubmit}>
         <div className="grid gap-2">
@@ -106,11 +106,6 @@ const RegisterForm = () => {
           </Button>
         </div>
       </form>
-      <div className="flex justify-between pt-2 font-medium">
-        <Link href="/sign-in" className="text-blue-500 text-sm">
-          Already have an account? Sign In
-        </Link>
-      </div>
       <div className="relative my-4">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
@@ -130,6 +125,13 @@ const RegisterForm = () => {
       >
         {isLoading ? <CgSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FcGoogle className="mr-2 h-4 w-4" />} Google
       </Button>
+
+      <div className="text-center text-[16px] my-2">
+        <span className="text-muted-foreground">Already have an account?</span>{" "}
+        <Link href="/sign-in" className="underline font-medium">
+          Sign In
+        </Link>
+      </div>
     </>
   );
 };
