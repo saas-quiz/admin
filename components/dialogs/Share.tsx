@@ -1,4 +1,6 @@
-import { CopyIcon } from "@radix-ui/react-icons";
+"use client";
+
+import { CopyIcon, ReloadIcon } from "@radix-ui/react-icons";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,26 +15,60 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import React, { useEffect } from "react";
+import { publishQuizDB } from "@/lib/actions/quiz.actions";
+import { error, success } from "@/lib/utils";
 
-export function DialogCloseButton() {
+export function PublishQuiz({ id, isPublished }: { id: string; isPublished: boolean }) {
+  const [generated, setGenerated] = React.useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (isPublished) {
+        setGenerated(true);
+        return null;
+      } else {
+        const res = await publishQuizDB({ quizId: id });
+        if (!res.ok) {
+          error(res.error!);
+          return;
+        }
+        setGenerated(true);
+      }
+    };
+    fetchData();
+  }, []);
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Share</Button>
+        <Button variant="outline">Publish</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share link</DialogTitle>
-          <DialogDescription>Anyone who has this link will be able to view this.</DialogDescription>
+          <DialogTitle>{generated ? "Share" : "generating"} link</DialogTitle>
+          <DialogDescription>Anyone who has this link will be able to view this quiz.</DialogDescription>
         </DialogHeader>
         <div className="flex items-center space-x-2">
           <div className="grid flex-1 gap-2">
             <Label htmlFor="link" className="sr-only">
               Link
             </Label>
-            <Input id="link" defaultValue="https://ui.shadcn.com/docs/installation" readOnly />
+            {generated ? (
+              <Input id="link" defaultValue={process.env.NEXT_PUBLIC_APP_URL + "/share/quiz/" + id} readOnly />
+            ) : (
+              <ReloadIcon className="h-4 w-4 animate-spin" />
+            )}
           </div>
-          <Button type="submit" size="sm" className="px-3">
+          <Button
+            type="submit"
+            size="sm"
+            className="px-3"
+            disabled={!generated}
+            onClick={() => {
+              navigator.clipboard.writeText(process.env.NEXT_PUBLIC_APP_URL + "/share/quiz/" + id);
+              success("Link copied to clipboard");
+            }}
+          >
             <span className="sr-only">Copy</span>
             <CopyIcon className="h-4 w-4" />
           </Button>

@@ -18,7 +18,7 @@ const EditQuestion = ({
 }: {
   question: IQuestion;
   data: IQuiz | null;
-  setData: React.Dispatch<React.SetStateAction<IQuiz | null>>;
+  setData?: React.Dispatch<React.SetStateAction<IQuiz | null>>;
 }) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -48,7 +48,7 @@ const EditQuestion = ({
 
     // update question
     const updatedQuestions = data ? data.questions.map((q: IQuestion) => (q.id === question.id ? res.data : q)) : [];
-    setData({ ...data, questions: updatedQuestions } as IQuiz);
+    setData && setData({ ...data, questions: updatedQuestions } as IQuiz);
     setOpen(false);
     success("Question updated successfully");
   };

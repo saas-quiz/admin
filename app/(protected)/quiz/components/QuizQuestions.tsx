@@ -11,7 +11,7 @@ const QuizQuestions = ({
 }: {
   questions: IQuestion[];
   data: IQuiz | null;
-  setData: React.Dispatch<React.SetStateAction<IQuiz | null>>;
+  setData?: React.Dispatch<React.SetStateAction<IQuiz | null>>;
   editable?: boolean;
 }) => {
   return (

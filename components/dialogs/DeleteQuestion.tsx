@@ -14,7 +14,7 @@ const DeleteQuestion = ({
 }: {
   questionId: string;
   data: IQuiz | null;
-  setData: React.Dispatch<React.SetStateAction<IQuiz | null>>;
+  setData?: React.Dispatch<React.SetStateAction<IQuiz | null>>;
 }) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -26,7 +26,7 @@ const DeleteQuestion = ({
     if (!res.ok) return error(res.error!);
 
     const upatedQuestions = data ? data.questions.filter((q) => q.id !== questionId) : [];
-    setData({ ...data, questions: upatedQuestions } as IQuiz);
+    setData && setData({ ...data, questions: upatedQuestions } as IQuiz);
     setOpen(false);
     success("Question deleted successfully");
   };

@@ -16,6 +16,7 @@ import QuizQuestions from "./components/QuizQuestions";
 import AddQuestion from "@/components/dialogs/AddQuestion";
 import Link from "next/link";
 import DeleteQuiz from "@/components/dialogs/DeleteQuiz";
+import { PublishQuiz } from "@/components/dialogs/Share";
 
 const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -55,6 +56,8 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
           </Button>
         </div>
       </div>
+
+      <PublishQuiz id={data.id} isPublished={data.published} />
 
       <QuizHeader title={data.title} images={data.images || []} editable />
       <UserInputs inputs={data.userInputs} editable />

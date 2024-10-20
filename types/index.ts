@@ -1,8 +1,8 @@
 export interface IUser {
   id: string;
+  name: string;
   email: string;
-  exp: number;
-  iat: number;
+  phone: string;
 }
 
 export interface IGroup {
@@ -74,8 +74,8 @@ export interface IQuizParticipant {
 }
 
 export interface IParticipantQuizAnswer {
-  id: string;
+  id?: string;
   answer: string;
   questionId: string;
-  quizId: string;
+  quizId?: string;
 }

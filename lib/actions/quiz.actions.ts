@@ -3,6 +3,19 @@
 import { IImage } from "@/types";
 import { prisma } from "../prisma";
 
+export const publishQuizDB = async ({ quizId }: { quizId: string }) => {
+  try {
+    const res = await prisma.quiz.update({
+      where: { id: quizId },
+      data: { published: true },
+    });
+    return { ok: true, data: res };
+  } catch (error: any) {
+    console.error(error?.message);
+    return { ok: false, error: "Something went wrong" };
+  }
+};
+
 export const getQuizDB = async ({ id }: { id: string }) => {
   try {
     const res = await prisma.quiz.findUnique({

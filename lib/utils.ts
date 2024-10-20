@@ -16,8 +16,8 @@ export const fetcherOpt = {
   // revalidateOnMount: false,
 };
 
-export const error = (msg: string, duration?: number) =>
-  toast({ title: "Error", description: msg, variant: "destructive", duration: duration || 3000 });
+export const error = (msg: string, duration?: number, noTitle?: boolean) =>
+  toast({ title: noTitle ? "" : "Error", description: msg, variant: "destructive", duration: duration || 3000 });
 export const success = (msg: string, type?: "success" | "default", action?: ReactElement) =>
   toast({ title: "Success", description: msg, variant: type || "default", action });
 

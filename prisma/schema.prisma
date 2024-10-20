@@ -23,6 +23,7 @@ model User {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
   name        String?
   email       String  @unique
+  phone       String?
   password    String
   googleId    String?
   role        Role[]  @default([USER])
@@ -74,20 +75,32 @@ model QuizParticipant {
   Quiz    Quiz   @relation(fields: [quizId], references: [id])
   Group   Group  @relation(fields: [groupId], references: [id])
 
-  answers ParticipantQuizAnswer[]
+  Answers    ParticipantQuizAnswer[]
+  QuizInputs QuizInput[]
 
+  @@unique([userId, quizId])
   @@map("quiz_participants")
 }
 
-model ParticipantQuizAnswer {
-  id              String          @id @default(auto()) @map("_id") @db.ObjectId
-  answer          String
-  questionId      String          @db.ObjectId
-  Question        Question        @relation(fields: [questionId], references: [id])
-  QuizId          String          @db.ObjectId
-  ParticipantQuiz QuizParticipant @relation(fields: [QuizId], references: [id])
+model QuizInput {
+  id                String          @id @default(auto()) @map("_id") @db.ObjectId
+  key               String
+  value             String
+  quizParticipantId String          @db.ObjectId
+  QuizParticipant   QuizParticipant @relation(fields: [quizParticipantId], references: [id])
 
-  @@unique([QuizId, questionId])
+  @@map("quiz_inputs")
+}
+
+model ParticipantQuizAnswer {
+  id                String          @id @default(auto()) @map("_id") @db.ObjectId
+  answer            String
+  questionId        String          @db.ObjectId
+  Question          Question        @relation(fields: [questionId], references: [id])
+  quizParticipantId String          @db.ObjectId
+  QuizParticipant   QuizParticipant @relation(fields: [quizParticipantId], references: [id])
+
+  @@unique([quizParticipantId, questionId])
   @@map("participant_quiz_answers")
 }
 
