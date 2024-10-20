@@ -35,7 +35,7 @@ export const verifyToken = (token: string, secret: string) => {
   return jwt.verify(token, secret);
 };
 
-export const uploadImage = async (file: File) => {
+export const uploadImageAPI = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
 

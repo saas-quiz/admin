@@ -146,11 +146,12 @@ model Option {
 }
 
 model Image {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  key    String
-  url    String
-  quizId String @db.ObjectId
-  quiz   Quiz   @relation(fields: [quizId], references: [id])
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  key      String
+  url      String
+  publicId String
+  quizId   String @db.ObjectId
+  quiz     Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("images")
 }

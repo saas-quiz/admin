@@ -8,9 +8,9 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useDataStore } from "@/stores/data";
-import { error, success, uploadImage } from "@/lib/utils";
+import { error, success, uploadImageAPI } from "@/lib/utils";
 import { useGroups } from "@/hooks/useGroups";
-import { createQuizDB } from "@/lib/actions/group.actions";
+import { createQuizDB } from "@/lib/actions/quiz.actions";
 import { useSession } from "next-auth/react";
 import { IQuiz } from "@/types";
 import ImageUplaod from "@/app/(protected)/quiz/components/ImageUplaod";
@@ -29,6 +29,17 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
   const [inputs, setInputs] = React.useState<string[]>([]);
   const [formStatus, setFormStatus] = React.useState("");
 
+  const uploadImage = async (file: File, key: string) => {
+    const res = await uploadImageAPI(file);
+    if (!res.ok) {
+      error(res.error, 1000);
+      setFormStatus("");
+      return;
+    }
+    const { public_id, secure_url } = res.data;
+    return { key, publicId: public_id, url: secure_url };
+  };
+
   const submitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormStatus("loading...");
@@ -43,24 +54,12 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
     }
 
     // upload images
+    let uploadedImages: { key: string; publicId: string; url: string }[] = [];
     if (images.length > 0) {
       setFormStatus("uploading...");
       for (const image of images) {
-        const res = await uploadImage(image.file!);
-        if (!res.ok) {
-          error(res.error, 1000);
-          setFormStatus("");
-          return;
-        }
-        const { public_id, secure_url } = res.data;
-        setImages((prevImages) => {
-          return prevImages.map((img) => {
-            if (img.key === image.key) {
-              return { ...img, publicId: public_id, url: secure_url };
-            }
-            return img;
-          });
-        });
+        const obj = await uploadImage(image.file!, image.key);
+        if (obj) uploadedImages.push(obj);
       }
     }
 
@@ -69,6 +68,7 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
       author: session?.user?.name!,
       groupId: group?.id!,
       userInputs: inputs,
+      images: uploadedImages,
     });
     if (!res.ok) {
       error(res.error!, 1000);

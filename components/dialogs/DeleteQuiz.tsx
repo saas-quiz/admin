@@ -13,14 +13,21 @@ import { Button } from "../ui/button";
 import { error, success } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { deleteQuizDB } from "@/lib/actions/quiz.actions";
+import { IImage } from "@/types";
 
-const DeleteQuiz = ({ quizId, groupId }: { quizId: string; groupId: string }) => {
+const DeleteQuiz = ({ quizId, images, groupId }: { quizId: string; images: IImage[]; groupId: string }) => {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   const handledelete = async () => {
     setLoading(true);
+
+    if (images.length > 0) {
+      const imagesPublicIds = images.map((image) => image.publicId);
+      await fetch(`/api/image?public_ids=${imagesPublicIds.join(",")}`, { method: "DELETE" });
+    }
+
     const res = await deleteQuizDB({ quizId });
     setLoading(false);
     if (!res.ok) return error(res.error!);

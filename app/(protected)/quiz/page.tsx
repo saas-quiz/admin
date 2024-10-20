@@ -51,7 +51,7 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
             </Link>
           </Button>
           <Button variant={"ghost"} size={"icon"} className="text-red-600 hover:bg-red-100 hover:text-red-600">
-            <DeleteQuiz quizId={data.id} groupId={data.groupId} />
+            <DeleteQuiz quizId={data.id} images={data.images || []} groupId={data.groupId} />
           </Button>
         </div>
       </div>

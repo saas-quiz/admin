@@ -2,6 +2,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { error } from "@/lib/utils";
+import { IImage } from "@/types";
 import Image from "next/image";
 import React from "react";
 
@@ -9,10 +10,14 @@ const ImageUplaod = ({
   type,
   images,
   setImages,
+  setDeleteImage,
+  edit,
 }: {
   type: string;
-  images: { key: string; file?: File; url: string }[];
-  setImages: React.Dispatch<React.SetStateAction<{ key: string; file?: File; url: string }[]>>;
+  edit?: boolean;
+  images: IImage[];
+  setImages: React.Dispatch<React.SetStateAction<IImage[]>>;
+  setDeleteImage?: React.Dispatch<React.SetStateAction<string[]>>;
 }) => {
   const image = images.find((img) => img.key === type);
 
@@ -28,6 +33,11 @@ const ImageUplaod = ({
       if (files[0].size > 1 * 1024 * 1024) {
         error("Image size should be less than 1MB");
         return;
+      }
+
+      // if image already exists, delete it from cloudinary
+      if (image?.publicId && setDeleteImage) {
+        setDeleteImage((prev) => [...prev, image.publicId!]);
       }
 
       const blob = URL.createObjectURL(files[0]);
@@ -57,7 +67,7 @@ const ImageUplaod = ({
           />
         )}
       </AspectRatio>
-      <p className="text-xs md:text-sm">Upload Image</p>
+      <p className="text-xs md:text-sm">{edit ? "Change Image" : "Upload Image"}</p>
       <Input type="file" className="hidden" accept="image/*" id={`${type}-image-upload`} onChange={handleImageChange} />
     </Label>
   );

@@ -1,5 +1,6 @@
 "use server";
 
+import { IImage } from "@/types";
 import { prisma } from "../prisma";
 
 export const getQuizDB = async ({ id }: { id: string }) => {
@@ -17,32 +18,118 @@ export const getQuizDB = async ({ id }: { id: string }) => {
   }
 };
 
-export const updateQuizDB = async (
+export const createQuizDB = async (
   values: { [k: string]: FormDataEntryValue },
-  { quizId, userInputs }: { quizId: string; userInputs: string[] }
+  { author, groupId, userInputs, images }: { author: string; groupId: string; userInputs: string[]; images: IImage[] }
 ) => {
   try {
-    const res = await prisma.quiz.update({
-      where: { id: quizId as string },
-      data: {
-        title: values.title as string,
-        desc: values.desc as string,
-        userInputs: userInputs,
-        duration: parseInt(values.duration as string) || 0,
-        maxMarks: parseInt(values.maxMarks as string) || 0,
-        footerHeading1: values.footerHeading1 as string,
-        footerHeading2: values.footerHeading2 as string,
-        footerText1: values.footerText1 as string,
-        footerText2: values.footerText2 as string,
-        footerLink: values.footerLink as string,
-      },
-      include: { images: true },
+    const res = await prisma.$transaction(async (pm) => {
+      const quiz = await prisma.quiz.create({
+        data: {
+          title: values.title as string,
+          desc: values.desc as string,
+          userInputs: userInputs,
+          duration: parseInt(values.duration as string) || 0,
+          maxMarks: parseInt(values.maxMarks as string) || 0,
+          footerHeading1: values.footerHeading1 as string,
+          footerHeading2: values.footerHeading2 as string,
+          footerText1: values.footerText1 as string,
+          footerText2: values.footerText2 as string,
+          footerLink: values.footerLink as string,
+          author: author,
+          groupId: groupId,
+        },
+        include: { images: true },
+      });
+
+      if (images.length > 0) {
+        const imagePromises = images.map(async (image) => {
+          const res = await pm.image.create({
+            data: {
+              url: image.url,
+              publicId: image.publicId!,
+              key: image.key,
+              quizId: quiz.id,
+            },
+          });
+          return res;
+        });
+        const imagesRes = await Promise.all(imagePromises);
+        return { ...quiz, images: imagesRes };
+      }
+      return quiz;
     });
     return { ok: true, data: res };
   } catch (error: any) {
     if (error.code === "P2002") {
       return { ok: false, error: "Group name already exists" };
     }
+    console.error(error?.message);
+    return { ok: false, error: "Something went wrong" };
+  }
+};
+
+export const updateQuizDB = async (
+  values: { [k: string]: FormDataEntryValue },
+  { quizId, userInputs, images }: { quizId: string; userInputs: string[]; images: IImage[] }
+) => {
+  try {
+    const res = await prisma.$transaction(async (pm) => {
+      const quiz = await pm.quiz.update({
+        where: { id: quizId as string },
+        data: {
+          title: values.title as string,
+          desc: values.desc as string,
+          userInputs: userInputs,
+          duration: parseInt(values.duration as string) || 0,
+          maxMarks: parseInt(values.maxMarks as string) || 0,
+          footerHeading1: values.footerHeading1 as string,
+          footerHeading2: values.footerHeading2 as string,
+          footerText1: values.footerText1 as string,
+          footerText2: values.footerText2 as string,
+          footerLink: values.footerLink as string,
+        },
+        include: { images: true },
+      });
+
+      if (images.length > 0) {
+        await pm.image.deleteMany({
+          where: { quizId: quiz.id },
+        });
+
+        const imagePromises = images.map(async (image) => {
+          return pm.image.create({
+            data: {
+              key: image.key,
+              url: image.url,
+              publicId: image.publicId!,
+              quizId: quiz.id,
+            },
+          });
+        });
+        const imagesRes = await Promise.all(imagePromises);
+        return { ...quiz, images: imagesRes };
+      }
+      return quiz;
+    });
+    return { ok: true, data: res };
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      return { ok: false, error: "Group name already exists" };
+    }
+    console.error(error?.message);
+    return { ok: false, error: "Something went wrong" };
+  }
+};
+
+export const deleteQuizDB = async ({ quizId }: { quizId: string }) => {
+  try {
+    const res = await prisma.quiz.delete({
+      where: { id: quizId },
+    });
+
+    return { ok: true, data: res };
+  } catch (error: any) {
     console.error(error?.message);
     return { ok: false, error: "Something went wrong" };
   }
@@ -164,19 +251,6 @@ export const deleteQuestionDB = async ({ questionId }: { questionId: string }) =
   try {
     const res = await prisma.question.delete({
       where: { id: questionId },
-    });
-
-    return { ok: true, data: res };
-  } catch (error: any) {
-    console.error(error?.message);
-    return { ok: false, error: "Something went wrong" };
-  }
-};
-
-export const deleteQuizDB = async ({ quizId }: { quizId: string }) => {
-  try {
-    const res = await prisma.quiz.delete({
-      where: { id: quizId },
     });
 
     return { ok: true, data: res };

@@ -52,10 +52,12 @@ export interface IOption {
 }
 
 export interface IImage {
-  id: string;
+  id?: string;
   key: string;
+  publicId?: string;
+  file?: File;
   url: string;
-  quizId: string;
+  quizId?: string;
 }
 
 export interface IQuizParticipant {

@@ -9,7 +9,7 @@ import AddQuizInput from "@/app/(protected)/quiz/components/AddQuizInput";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { redirect, useRouter } from "next/navigation";
-import { error, success } from "@/lib/utils";
+import { error, success, uploadImageAPI } from "@/lib/utils";
 import { updateQuizDB } from "@/lib/actions/quiz.actions";
 import { IQuiz } from "@/types";
 import { getQuizDB } from "@/lib/actions/quiz.actions";
@@ -22,6 +22,7 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   const [images, setImages] = React.useState<{ key: string; publicId?: string; file?: File; url: string }[]>(
     data?.images || []
   );
+  const [imagePublicId, setImagePublicId] = React.useState<string[]>([]);
   const [quizName, setQuizName] = React.useState(data?.title || "");
   const [inputs, setInputs] = React.useState<string[]>(data?.userInputs || []);
   const [formStatus, setFormStatus] = React.useState("");
@@ -48,6 +49,17 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
     return <div>Loading...</div>;
   }
 
+  const uploadImage = async (file: File, key: string) => {
+    const res = await uploadImageAPI(file);
+    if (!res.ok) {
+      error(res.error, 1000);
+      setFormStatus("");
+      return;
+    }
+    const { public_id, secure_url } = res.data;
+    return { key, publicId: public_id, url: secure_url };
+  };
+
   const submitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormStatus("loading...");
@@ -61,32 +73,29 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
       return error("Quiz title is required", 1000);
     }
 
+    console.log(imagePublicId);
     // upload images
-    // if (images.length > 0) {
-    //   setFormStatus("uploading...");
-    //   for (const image of images) {
-    //     const res = await uploadImage(image.file!);
-    //     if (!res.ok) {
-    //       error(res.error, 1000);
-    //       setFormStatus("");
-    //       return;
-    //     }
-    //     const { public_id, secure_url } = res.data;
-    //     setImages((prevImages) => {
-    //       return prevImages.map((img) => {
-    //         if (img.key === image.key) {
-    //           return { ...img, publicId: public_id, url: secure_url };
-    //         }
-    //         return img;
-    //       });
-    //     });
-    //   }
-    // }
+    let uploadedImages: { key: string; publicId: string; url: string }[] = [];
+    if (images.length > 0) {
+      setFormStatus("uploading...");
+      for (const image of images) {
+        if (!image.publicId) {
+          const obj = await uploadImage(image.file!, image.key);
+          if (obj) uploadedImages.push(obj);
+        } else {
+          uploadedImages.push({ key: image.key, publicId: image.publicId, url: image.url });
+        }
+      }
+    }
+    if (imagePublicId.length > 0) {
+      await fetch(`/api/image?public_ids=${imagePublicId.join(",")}`, { method: "DELETE" });
+    }
 
     setFormStatus("updating...");
     const res = await updateQuizDB(values, {
       quizId: data.id!,
       userInputs: inputs,
+      images: uploadedImages,
     });
     if (!res.ok) {
       error(res.error!, 1000);
@@ -104,11 +113,11 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   return (
     <div className="grid grid-cols-1 gap-4">
       <div className="flex justify-between gap-2 w-full">
-        <ImageUplaod type="left" setImages={setImages} images={images} />
+        <ImageUplaod type="left" setImages={setImages} images={images} setDeleteImage={setImagePublicId} edit />
         <div className="bg-muted h-fit w-fit max-w-[55%] rounded-b-md px-2 py-1 title-shadow">
           <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-medium text-center line-clamp-2">{quizName}</h1>
         </div>
-        <ImageUplaod type="right" setImages={setImages} images={images} />
+        <ImageUplaod type="right" setImages={setImages} images={images} setDeleteImage={setImagePublicId} edit />
       </div>
 
       <form onSubmit={submitHandler}>
