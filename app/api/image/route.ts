@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { NextApiRequest } from "next";
 import { auth } from "@/auth";
 
 export async function POST(req: NextRequest) {
@@ -47,7 +46,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextApiRequest) {
+export async function DELETE(req: NextRequest) {
   const reqUrl = new URL(req.url || "");
   const searchParams = Object.fromEntries(reqUrl.searchParams.entries());
 
