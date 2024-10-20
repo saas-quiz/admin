@@ -96,3 +96,21 @@ export const submitParticipantQuizDB = async ({
     return { ok: false, error: "Something went wrong" };
   }
 };
+
+export const getQuizParticipantsDB = async ({ quizId }: { quizId: string }) => {
+  try {
+    const participants = await prisma.quizParticipant.findMany({
+      where: { quizId },
+      include: {
+        User: { select: { name: true, email: true, phone: true } },
+        Quiz: { select: { title: true, questions: { select: { id: true, answer: true } } } },
+        Answers: true,
+        QuizInputs: true,
+      },
+    });
+    return { ok: true, data: participants };
+  } catch (error: any) {
+    console.log(error.message);
+    return { ok: false, error: "Something went wrong" };
+  }
+};

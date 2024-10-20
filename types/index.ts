@@ -40,8 +40,8 @@ export interface IQuestion {
   id: string;
   title: string;
   answer: string;
-  options: IOption[];
   quizId: string;
+  options: IOption[];
 }
 
 export interface IOption {
@@ -62,20 +62,23 @@ export interface IImage {
 
 export interface IQuizParticipant {
   id: string;
-  answers: IParticipantQuizAnswer[];
   userId: string;
   quizId: string;
   groupId: string;
-  createdAt: Date;
+  User: IUser;
+  Quiz: IQuiz;
+  Group?: IGroup;
 
-  user: IUser;
-  quiz: IQuiz;
-  group: IGroup;
+  Answers: IParticipantQuizAnswer[];
+  QuizInputs: { id: string; key: string; value: string; quizParticipantId: string }[];
+  createdAt: Date;
 }
 
 export interface IParticipantQuizAnswer {
-  id?: string;
+  id: string;
   answer: string;
   questionId: string;
-  quizId?: string;
+  Question: IQuestion;
+  quizParticipantId: string;
+  QuizParticipant: IQuizParticipant;
 }

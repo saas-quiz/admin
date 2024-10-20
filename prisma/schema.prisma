@@ -77,6 +77,7 @@ model QuizParticipant {
 
   Answers    ParticipantQuizAnswer[]
   QuizInputs QuizInput[]
+  createdAt  DateTime                @default(now())
 
   @@unique([userId, quizId])
   @@map("quiz_participants")

@@ -40,8 +40,10 @@ export function PublishQuiz({ id, isPublished }: { id: string; isPublished: bool
   }, []);
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline">Publish</Button>
+      <DialogTrigger asChild className="">
+        <Button variant="outline" className="w-fit">
+          Publish
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
