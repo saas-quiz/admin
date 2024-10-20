@@ -66,16 +66,29 @@ model GroupMember {
 }
 
 model QuizzesParticipant {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
-  answers String[]
-  userId  String   @db.ObjectId
-  quizId  String   @db.ObjectId
-  groupId String   @db.ObjectId
-  User    User     @relation(fields: [userId], references: [id])
-  Quiz    Quiz     @relation(fields: [quizId], references: [id])
-  Group   Group    @relation(fields: [groupId], references: [id])
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String @db.ObjectId
+  quizId  String @db.ObjectId
+  groupId String @db.ObjectId
+  User    User   @relation(fields: [userId], references: [id])
+  Quiz    Quiz   @relation(fields: [quizId], references: [id])
+  Group   Group  @relation(fields: [groupId], references: [id])
 
-  @@map("quizzes_participant")
+  answers ParticipantQuizAnswer[]
+
+  @@map("quizzes_participants")
+}
+
+model ParticipantQuizAnswer {
+  id                 String             @id @default(auto()) @map("_id") @db.ObjectId
+  answer             String
+  questionId         String             @db.ObjectId
+  Question           Question           @relation(fields: [questionId], references: [id])
+  QuizId             String             @db.ObjectId
+  QuizzesParticipant QuizzesParticipant @relation(fields: [QuizId], references: [id])
+
+  @@unique([QuizId, questionId])
+  @@map("participant_quiz_answers")
 }
 
 model Quiz {
@@ -117,6 +130,8 @@ model Question {
 
   quizId String @db.ObjectId
   quiz   Quiz   @relation(fields: [quizId], references: [id])
+
+  ParticipantQuizAnswers ParticipantQuizAnswer[]
 
   @@map("questions")
 }
