@@ -17,6 +17,37 @@ export const getQuizDB = async ({ id }: { id: string }) => {
   }
 };
 
+export const updateQuizDB = async (
+  values: { [k: string]: FormDataEntryValue },
+  { quizId, userInputs }: { quizId: string; userInputs: string[] }
+) => {
+  try {
+    const res = await prisma.quiz.update({
+      where: { id: quizId as string },
+      data: {
+        title: values.title as string,
+        desc: values.desc as string,
+        userInputs: userInputs,
+        duration: parseInt(values.duration as string) || 0,
+        maxMarks: parseInt(values.maxMarks as string) || 0,
+        footerHeading1: values.footerHeading1 as string,
+        footerHeading2: values.footerHeading2 as string,
+        footerText1: values.footerText1 as string,
+        footerText2: values.footerText2 as string,
+        footerLink: values.footerLink as string,
+      },
+      include: { images: true },
+    });
+    return { ok: true, data: res };
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      return { ok: false, error: "Group name already exists" };
+    }
+    console.error(error?.message);
+    return { ok: false, error: "Something went wrong" };
+  }
+};
+
 export const addQuestionDB = async ({
   title,
   answer,
@@ -133,6 +164,19 @@ export const deleteQuestionDB = async ({ questionId }: { questionId: string }) =
   try {
     const res = await prisma.question.delete({
       where: { id: questionId },
+    });
+
+    return { ok: true, data: res };
+  } catch (error: any) {
+    console.error(error?.message);
+    return { ok: false, error: "Something went wrong" };
+  }
+};
+
+export const deleteQuizDB = async ({ quizId }: { quizId: string }) => {
+  try {
+    const res = await prisma.quiz.delete({
+      where: { id: quizId },
     });
 
     return { ok: true, data: res };

@@ -42,7 +42,7 @@ const DeleteQuestion = ({
         <div className="grid items-center gap-1.5">
           <Label htmlFor="question">Are you sure you want to delete this question?</Label>
         </div>
-        <DialogFooter>
+        <DialogFooter className="mt-10">
           <Button variant={"outline"} onClick={() => setOpen(false)} size={"sm"}>
             Cancel
           </Button>

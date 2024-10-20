@@ -6,7 +6,6 @@ import { error } from "@/lib/utils";
 import { IQuiz } from "@/types";
 import { getQuizDB } from "@/lib/actions/quiz.actions";
 import { Button } from "@/components/ui/button";
-import { Trash2Icon } from "lucide-react";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import QuizHeader from "./components/QuizHeader";
 import UserInputs from "./components/UserInputs";
@@ -15,6 +14,8 @@ import QuizDesc from "./components/QuizDesc";
 import QuizFooter from "./components/QuizFooter";
 import QuizQuestions from "./components/QuizQuestions";
 import AddQuestion from "@/components/dialogs/AddQuestion";
+import Link from "next/link";
+import DeleteQuiz from "@/components/dialogs/DeleteQuiz";
 
 const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -41,14 +42,16 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
 
   return (
     <div className="w-full mx-auto max-w-6xl flex flex-col gap-5">
-      <div className="flex items-center justify-between bg-muted rounded-lg px-2 shadow-sm">
+      <div className="flex items-center justify-between bg-muted rounded-lg px-2 shadow-md">
         <h1 className="md:text-xl font-semibold tracking-tight line-clamp-2">{data.title}</h1>
-        <div className="flex">
-          <Button variant={"ghost"} size={"icon"} className="text-blue-600 hover:bg-blue-50 hover:text-blue-600">
-            <Pencil1Icon className="h-4 w-4" />
+        <div className="flex gap-1">
+          <Button variant={"ghost"} size={"icon"} className="text-blue-600 hover:bg-blue-100 hover:text-blue-600">
+            <Link href={`/quiz/edit?id=${data.id}`}>
+              <Pencil1Icon className="h-4 w-4" />
+            </Link>
           </Button>
-          <Button variant={"ghost"} size={"icon"} className="text-red-600 hover:bg-red-50 hover:text-red-600">
-            <Trash2Icon className="h-4 w-4" />
+          <Button variant={"ghost"} size={"icon"} className="text-red-600 hover:bg-red-100 hover:text-red-600">
+            <DeleteQuiz quizId={data.id} groupId={data.groupId} />
           </Button>
         </div>
       </div>

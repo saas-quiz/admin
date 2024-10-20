@@ -4,20 +4,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import React, { useEffect, useMemo } from "react";
-import AddUserInput from "./components/AddQuizInput";
-import ImageUplaod from "./components/ImageUplaod";
-import QuizTitle from "./components/QuizTitle";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useDataStore } from "@/stores/data";
 import { error, success, uploadImage } from "@/lib/utils";
 import { useGroups } from "@/hooks/useGroups";
 import { createQuizDB } from "@/lib/actions/group.actions";
-import { useAuthStore } from "@/stores/auth";
-import { Session, User } from "next-auth";
 import { useSession } from "next-auth/react";
 import { IQuiz } from "@/types";
+import ImageUplaod from "@/app/(protected)/quiz/components/ImageUplaod";
+import AddQuizInput from "@/app/(protected)/quiz/components/AddQuizInput";
 
 const Page = ({ searchParams }: { searchParams: { group: string } }) => {
   const router = useRouter();
@@ -111,10 +108,9 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
     <div className="grid grid-cols-1 gap-4">
       <div className="flex justify-between gap-2 w-full">
         <ImageUplaod type="left" setImages={setImages} images={images} />
-        {/* <QuizTitle title="Quiz Title" /> */}
-        {/* <div className="text-center border border-dotted w-fit h-fit p-2 rounded bg-gray-100">
-          <h1 className="md:text-xl font-semibold line-clamp-2">{quizName}</h1>
-        </div> */}
+        <div className="bg-muted h-fit w-fit max-w-[55%] rounded-b-md px-2 py-1 title-shadow">
+          <h1 className="text-sm xs:text-xl md:text-2xl lg:text-3xl font-medium text-center line-clamp-2">{quizName}</h1>
+        </div>
         <ImageUplaod type="right" setImages={setImages} images={images} />
       </div>
 
@@ -133,7 +129,7 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
           <div className="grid grid-cols-1 gap-2">
             <div className="flex justify-between gap-2">
               <div className="w-full">
-                <Label>Time Duration</Label>
+                <Label>Time Duration (in minutes)</Label>
                 <Input type="number" name="duration" />
               </div>
               <div className="w-full">
@@ -144,7 +140,7 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
           </div>
 
           <div className="grid grid-cols-1 gap-2">
-            <AddUserInput inputs={inputs} setInputs={setInputs} />
+            <AddQuizInput inputs={inputs} setInputs={setInputs} />
           </div>
 
           <Separator />
