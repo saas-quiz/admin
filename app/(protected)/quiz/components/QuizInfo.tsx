@@ -10,8 +10,12 @@ const QuizInfo = ({ duration, maxMarks, editable }: { duration: number; maxMarks
     );
   return (
     <div className="border-t border-b flex justify-between text-sm">
-      <div>Max Marks: {maxMarks}</div>
-      <div>Duration: {duration} mins</div>
+      <div>
+        <span className="font-medium">Max Marks:</span> {maxMarks}
+      </div>
+      <div>
+        <span className="font-medium">Duration:</span> {duration} mins
+      </div>
     </div>
   );
 };

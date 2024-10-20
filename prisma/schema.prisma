@@ -28,7 +28,7 @@ model User {
   role        Role[]  @default([USER])
   isOnBoarded Boolean @default(false)
 
-  quizzes QuizzesParticipant[] // student quizzes
+  quizzes QuizParticipant[] // student quizzes
   // requests Request[] // student requests to join quiz
 
   adminOf  Group[]       @relation("GroupAdmin")
@@ -47,7 +47,7 @@ model Group {
   admin   User          @relation("GroupAdmin", fields: [adminId], references: [id])
   members GroupMember[]
 
-  QuizzesParticipant QuizzesParticipant[]
+  QuizParticipants QuizParticipant[]
 
   @@unique([adminId, name])
   @@map("groups")
@@ -65,7 +65,7 @@ model GroupMember {
   @@map("group_members")
 }
 
-model QuizzesParticipant {
+model QuizParticipant {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   userId  String @db.ObjectId
   quizId  String @db.ObjectId
@@ -76,16 +76,16 @@ model QuizzesParticipant {
 
   answers ParticipantQuizAnswer[]
 
-  @@map("quizzes_participants")
+  @@map("quiz_participants")
 }
 
 model ParticipantQuizAnswer {
-  id                 String             @id @default(auto()) @map("_id") @db.ObjectId
-  answer             String
-  questionId         String             @db.ObjectId
-  Question           Question           @relation(fields: [questionId], references: [id])
-  QuizId             String             @db.ObjectId
-  QuizzesParticipant QuizzesParticipant @relation(fields: [QuizId], references: [id])
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  answer          String
+  questionId      String          @db.ObjectId
+  Question        Question        @relation(fields: [questionId], references: [id])
+  QuizId          String          @db.ObjectId
+  ParticipantQuiz QuizParticipant @relation(fields: [QuizId], references: [id])
 
   @@unique([QuizId, questionId])
   @@map("participant_quiz_answers")
@@ -105,10 +105,11 @@ model Quiz {
   footerText2    String?
   footerLink     String?
 
-  author       String
-  groupId      String               @db.ObjectId
-  group        Group                @relation("GroupQuizzes", fields: [groupId], references: [id])
-  participants QuizzesParticipant[]
+  author  String
+  groupId String @db.ObjectId
+  group   Group  @relation("GroupQuizzes", fields: [groupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  participants QuizParticipant[]
   questions    Question[]
   images       Image[]
 
@@ -120,20 +121,28 @@ model Quiz {
 }
 
 model Question {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  title   String
-  option1 String
-  option2 String
-  option3 String
-  option4 String
-  answer  String
-
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  title  String
+  answer String
   quizId String @db.ObjectId
-  quiz   Quiz   @relation(fields: [quizId], references: [id])
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  ParticipantQuizAnswers ParticipantQuizAnswer[]
+  options                Option[]
+  participantQuizAnswers ParticipantQuizAnswer[]
 
+  @@unique([quizId, title])
   @@map("questions")
+}
+
+model Option {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  key        String
+  value      String
+  questionId String   @db.ObjectId
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([questionId, value])
+  @@map("options")
 }
 
 model Image {

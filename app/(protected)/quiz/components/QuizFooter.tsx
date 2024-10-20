@@ -15,7 +15,7 @@ const QuizFooter = ({
   editable?: boolean;
 }) => {
   return (
-    <div className="flex flex-col items-center gap-2 mt-32">
+    <div className="flex flex-col items-center gap-2 mt-20">
       {data.footerHeading1 ? (
         <h1 className="text-2xl md:text-3xl font-semibold">{data.footerHeading1}</h1>
       ) : (

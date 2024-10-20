@@ -22,7 +22,9 @@ const QuizHeader = ({ title, images, editable }: { title: string; images: IImage
                   className="rounded-md object-contain w-full h-full"
                 />
               ) : (
-                <div className="w-full h-full bg-muted rounded-md grid place-content-center text-gray-400">Left Image</div>
+                <div className="w-full h-full bg-muted rounded-md grid place-content-center text-gray-400 text-sm md:text-base">
+                  Left Image
+                </div>
               )}
             </AspectRatio>
           )}
@@ -45,7 +47,9 @@ const QuizHeader = ({ title, images, editable }: { title: string; images: IImage
                   className="rounded-md object-contain w-full h-full"
                 />
               ) : (
-                <div className="w-full h-full bg-muted rounded-md grid place-content-center text-gray-400">Right Image</div>
+                <div className="w-full h-full bg-muted rounded-md grid place-content-center text-gray-400 text-sm  md:text-base">
+                  Right Image
+                </div>
               )}
             </AspectRatio>
           )}

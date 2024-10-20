@@ -1,24 +1,20 @@
 "use client";
 
-import { redirect, useSearchParams } from "next/navigation";
+import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { useDataStore } from "@/stores/data";
-import Link from "next/link";
-import useSWR from "swr";
-import { error, fetcher, fetcherOpt } from "@/lib/utils";
+import { error } from "@/lib/utils";
 import { IQuiz } from "@/types";
 import { getQuizDB } from "@/lib/actions/quiz.actions";
 import { Button } from "@/components/ui/button";
 import { Trash2Icon } from "lucide-react";
 import { Pencil1Icon } from "@radix-ui/react-icons";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import Image from "next/image";
 import QuizHeader from "./components/QuizHeader";
 import UserInputs from "./components/UserInputs";
 import QuizInfo from "./components/QuizInfo";
 import QuizDesc from "./components/QuizDesc";
 import QuizFooter from "./components/QuizFooter";
 import QuizQuestions from "./components/QuizQuestions";
+import AddQuestion from "@/components/dialogs/AddQuestion";
 
 const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,7 +25,6 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
       if (searchParams.id) {
         console.log("call");
         const res = await getQuizDB({ id: searchParams.id });
-        console.log(res.data);
         setIsLoading(false);
         if (!res.ok) return error(res.error!);
         setData(res.data as IQuiz);
@@ -63,7 +58,8 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
       <QuizInfo duration={data.duration} maxMarks={data.maxMarks} editable />
       <QuizDesc desc={data.desc} editable />
 
-      <QuizQuestions questions={data.questions} editable />
+      <AddQuestion quizId={data.id} data={data} setData={setData} />
+      <QuizQuestions questions={data.questions} data={data} setData={setData} editable />
 
       <QuizFooter
         data={{

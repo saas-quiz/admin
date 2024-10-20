@@ -32,20 +32,23 @@ export interface IQuiz {
 
   questions: IQuestion[];
   images?: IImage[];
-  participants?: QuizzesParticipant[];
+  participants?: IQuizParticipant[];
   createdAt: Date;
 }
 
 export interface IQuestion {
   id: string;
   title: string;
-  option1: string;
-  option2: string;
-  option3: string;
-  option4: string;
   answer: string;
-
+  options: IOption[];
   quizId: string;
+}
+
+export interface IOption {
+  id: string;
+  key: string;
+  value: string;
+  questionId: string;
 }
 
 export interface IImage {
@@ -55,9 +58,9 @@ export interface IImage {
   quizId: string;
 }
 
-export interface QuizzesParticipant {
+export interface IQuizParticipant {
   id: string;
-  answers: string[];
+  answers: IParticipantQuizAnswer[];
   userId: string;
   quizId: string;
   groupId: string;
@@ -65,4 +68,12 @@ export interface QuizzesParticipant {
 
   user: IUser;
   quiz: IQuiz;
+  group: IGroup;
+}
+
+export interface IParticipantQuizAnswer {
+  id: string;
+  answer: string;
+  questionId: string;
+  quizId: string;
 }

@@ -12,9 +12,9 @@ const UserInputs = ({ inputs, editable }: { inputs: string[]; editable?: boolean
           </div>
         ))}
       {inputs.map((input, index) => (
-        <div key={index} className="flex text-gray-300 gap-2">
-          <div className="h-5 w-[30%] rounded-md">{input}</div>
-          <div className="border-b border-dashed border-gray-400 w-[50%]"></div>
+        <div key={index} className="flex gap-2">
+          <div className="h-5 rounded-md w-fit text-nowrap">{input}:</div>
+          <div className="border-b border-dashed border-gray-400 w-full px-2"></div>
         </div>
       ))}
     </div>
