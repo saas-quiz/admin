@@ -12,6 +12,7 @@ import QuizFooter from "./components/QuizFooter";
 import { IParticipantQuizAnswer, IUser } from "@/types";
 import { QuizSubmit } from "@/components/dialogs/SubmitQuiz";
 import { UserRegistration } from "@/components/dialogs/UserRegistration";
+import Loading from "@/components/shared/Loading";
 
 const Page = ({ params }: { params: { id: string } }) => {
   const [user, setUser] = React.useState<IUser | null>(null);
@@ -20,7 +21,11 @@ const Page = ({ params }: { params: { id: string } }) => {
   const [quizInputs, setQuizInputs] = React.useState<{ key: string; value: string }[]>([]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <span className="gap-2 mt-32 flex items-center justify-center">
+        <Loading />
+      </span>
+    );
   }
 
   if (data.quiz && data.ok) {

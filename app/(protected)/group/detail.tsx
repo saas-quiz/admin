@@ -6,6 +6,7 @@ import { IQuiz } from "@/types";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { useRouter, redirect } from "next/navigation";
 import useSWR from "swr";
+import Loading from "@/components/shared/Loading";
 
 const Detail = ({ id }: { id: string }) => {
   const router = useRouter();
@@ -15,7 +16,8 @@ const Detail = ({ id }: { id: string }) => {
     return (
       <div>
         <span className="gap-2 mt-10 flex items-center justify-center">
-          <ReloadIcon className="animate-spin" /> Loading...
+          {/* <ReloadIcon className="animate-spin" /> Loading... */}
+          <Loading />
         </span>
       </div>
     );
@@ -41,7 +43,7 @@ const Detail = ({ id }: { id: string }) => {
         {data.group.quizzes.map((quiz: IQuiz) => (
           <div
             key={quiz.id}
-            className="flex flex-col px-2 py-1 border h-20 w-full select-none cursor-pointer relative rounded-sm"
+            className="flex flex-col px-2 py-1 border h-20 w-full select-none cursor-pointer relative rounded-sm overflow-hidden"
             onClick={() => router.push(`/quiz?id=${quiz.id}`)}
           >
             {quiz.published && (
@@ -51,7 +53,7 @@ const Detail = ({ id }: { id: string }) => {
             )}
             <div className="flex-grow">
               <h2 className="font-medium">{quiz.title}</h2>
-              <p className="text-sm line-clamp-1 text-nowrap">{quiz.desc}</p>
+              <p className="text-xs line-clamp-2 text-nowrap">{quiz.desc}</p>
             </div>
             <p className="text-xs text-muted-foreground">Date: {new Date(quiz.createdAt).toLocaleDateString()}</p>
           </div>

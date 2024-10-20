@@ -20,6 +20,7 @@ import { PublishQuiz } from "@/components/dialogs/Share";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getQuizParticipantsDB } from "@/lib/actions/user.action";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import Loading from "@/components/shared/Loading";
 
 const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +41,11 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   if (!searchParams.id || (!isLoading && !data)) return redirect("/");
 
   if (isLoading || !data) {
-    return <div>Loading...</div>;
+    return (
+      <span className="gap-2 mt-32 flex items-center justify-center">
+        <Loading />
+      </span>
+    );
   }
 
   return (
