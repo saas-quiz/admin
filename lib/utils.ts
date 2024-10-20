@@ -10,13 +10,14 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const fetcher = (url: string) => fetch(url).then((res) => res.json());
-export const mutateOpt = {
+export const fetcherOpt = {
   revalidateOnFocus: false,
   revalidateOnReconnect: false,
-  revalidateOnMount: false,
+  // revalidateOnMount: false,
 };
 
-export const error = (msg: string) => toast({ title: "Error", description: msg, variant: "destructive" });
+export const error = (msg: string, duration?: number) =>
+  toast({ title: "Error", description: msg, variant: "destructive", duration: duration || 3000 });
 export const success = (msg: string, type?: "success" | "default", action?: ReactElement) =>
   toast({ title: "Success", description: msg, variant: type || "default", action });
 
@@ -32,4 +33,12 @@ export const generateTokens = (data: { id: string; email: string }, secret: stri
 
 export const verifyToken = (token: string, secret: string) => {
   return jwt.verify(token, secret);
+};
+
+export const uploadImage = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch("/api/image", { method: "POST", body: formData });
+  return await response.json();
 };

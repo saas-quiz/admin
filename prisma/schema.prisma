@@ -28,7 +28,7 @@ model User {
   role        Role[]  @default([USER])
   isOnBoarded Boolean @default(false)
 
-  quizzes ParticipantQuizzes[] // student quizzes
+  quizzes QuizzesParticipant[] // student quizzes
   // requests Request[] // student requests to join quiz
 
   adminOf  Group[]       @relation("GroupAdmin")
@@ -47,8 +47,9 @@ model Group {
   admin   User          @relation("GroupAdmin", fields: [adminId], references: [id])
   members GroupMember[]
 
-  ParticipantQuizzes ParticipantQuizzes[]
+  QuizzesParticipant QuizzesParticipant[]
 
+  @@unique([adminId, name])
   @@map("groups")
 }
 
@@ -64,7 +65,7 @@ model GroupMember {
   @@map("group_members")
 }
 
-model ParticipantQuizzes {
+model QuizzesParticipant {
   id      String   @id @default(auto()) @map("_id") @db.ObjectId
   answers String[]
   userId  String   @db.ObjectId
@@ -74,27 +75,45 @@ model ParticipantQuizzes {
   Quiz    Quiz     @relation(fields: [quizId], references: [id])
   Group   Group    @relation(fields: [groupId], references: [id])
 
-  @@map("participant_quizzes")
+  @@map("quizzes_participant")
 }
 
 model Quiz {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  title     String
-  questions Question[]
-  author    String
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  desc       String?
+  duration   Int?
+  maxMarks   Int?
+  userInputs String[]
 
-  participants ParticipantQuizzes[]
+  footerHeading1 String?
+  footerHeading2 String?
+  footerText1    String?
+  footerText2    String?
+  footerLink     String?
+
+  author       String
   groupId      String               @db.ObjectId
   group        Group                @relation("GroupQuizzes", fields: [groupId], references: [id])
+  participants QuizzesParticipant[]
+  questions    Question[]
+  images       Image[]
 
+  createdAt DateTime @default(now())
+  published Boolean  @default(false)
+
+  @@unique([groupId, title])
   @@map("quizzes")
 }
 
 model Question {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  title     String
-  options   Option[]
-  answerKey String
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  title   String
+  option1 String
+  option2 String
+  option3 String
+  option4 String
+  answer  String
 
   quizId String @db.ObjectId
   quiz   Quiz   @relation(fields: [quizId], references: [id])
@@ -102,13 +121,12 @@ model Question {
   @@map("questions")
 }
 
-model Option {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  key   String
-  value String
+model Image {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  key    String
+  url    String
+  quizId String @db.ObjectId
+  quiz   Quiz   @relation(fields: [quizId], references: [id])
 
-  questionId String   @db.ObjectId
-  question   Question @relation(fields: [questionId], references: [id])
-
-  @@map("options")
+  @@map("images")
 }
