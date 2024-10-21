@@ -22,7 +22,12 @@ const AddQuestion = ({
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [title, setTitle] = React.useState("");
-  const [options, setOptions] = React.useState<{ key: string; value: string }[]>([]);
+  const [options, setOptions] = React.useState<{ key: string; value: string }[]>([
+    { key: "a", value: "" },
+    { key: "b", value: "" },
+    { key: "c", value: "" },
+    { key: "d", value: "" },
+  ]);
   const [answer, setAnswer] = React.useState("");
 
   const handleSubmit = async () => {
@@ -55,6 +60,19 @@ const AddQuestion = ({
     success("Question added successfully");
   };
 
+  const handlePaste = (e: any) => {
+    const pastedData = e.clipboardData.getData("text");
+    const splitOptions = pastedData
+      .split("\n")
+      .map((s: string) => s.trim())
+      .filter((s: string) => s !== "");
+
+    if (splitOptions.length === 4) {
+      e.preventDefault();
+      setOptions(splitOptions.map((value: string, index: number) => ({ key: options[index].key, value })));
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -79,18 +97,19 @@ const AddQuestion = ({
         <div className="grid items-center gap-1.5">
           <Label htmlFor="question">Options</Label>
           <div className="grid grid-cols-2 gap-2">
-            {["a", "b", "c", "d"].map((o, i) => (
+            {options.map((o, i) => (
               <div key={i} className="flex items-center gap-1">
-                <Label htmlFor="option1">({o})</Label>
+                <Label htmlFor="option1">({o.key})</Label>
                 <Input
                   id="option1"
-                  placeholder={`option ${i + 1}`}
-                  value={options.find((opt) => opt.key === o)?.value || ""}
+                  placeholder={`option ${i + 1} ${i === 0 ? "|| Paste 4 options" : ""}`}
+                  value={o.value}
                   onChange={(e) => {
                     const newOptions = [...options];
-                    newOptions[i] = { key: o, value: e.target.value };
+                    newOptions[i].value = e.target.value;
                     setOptions(newOptions);
                   }}
+                  onPaste={i === 0 ? handlePaste : undefined}
                   className="w-full"
                 />
               </div>
