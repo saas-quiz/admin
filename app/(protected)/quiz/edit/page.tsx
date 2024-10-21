@@ -13,6 +13,7 @@ import { error, success, uploadImageAPI } from "@/lib/utils";
 import { updateQuizDB } from "@/lib/actions/quiz.actions";
 import { IQuiz } from "@/types";
 import { getQuizDB } from "@/lib/actions/quiz.actions";
+import Loading from "@/components/shared/Loading";
 
 const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   const router = useRouter();
@@ -46,7 +47,11 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   if (!searchParams.id || (!isLoading && !data)) return redirect("/");
 
   if (isLoading || !data) {
-    return <div>Loading...</div>;
+    return (
+      <span className="gap-2 mt-10 flex items-center justify-center">
+        <Loading />
+      </span>
+    );
   }
 
   const uploadImage = async (file: File, key: string) => {
@@ -73,7 +78,6 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
       return error("Quiz title is required", 1000);
     }
 
-    console.log(imagePublicId);
     // upload images
     let uploadedImages: { key: string; publicId: string; url: string }[] = [];
     if (images.length > 0) {

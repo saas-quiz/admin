@@ -42,7 +42,7 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
 
   if (isLoading || !data) {
     return (
-      <span className="gap-2 mt-32 flex items-center justify-center">
+      <span className="gap-2 mt-10 flex items-center justify-center">
         <Loading />
       </span>
     );
