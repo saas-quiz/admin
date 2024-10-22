@@ -66,10 +66,12 @@ export interface IQuizParticipant {
   quizId: string;
   groupId: string;
   isQualified: boolean;
+  anyReason?: string;
   User: IUser;
   Quiz: IQuiz;
   Group?: IGroup;
 
+  correctAnswers?: number;
   Answers: IParticipantQuizAnswer[];
   QuizInputs: { id: string; key: string; value: string; quizParticipantId: string }[];
   createdAt: Date;

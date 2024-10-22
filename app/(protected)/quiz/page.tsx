@@ -21,6 +21,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getQuizParticipantsDB } from "@/lib/actions/user.action";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Loading from "@/components/shared/Loading";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -107,6 +109,38 @@ const QuizParticipants = ({ quizId }: { quizId: string }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [participants, setParticipants] = useState<IQuizParticipant[]>([]);
 
+  // const generatePercentile = () => {
+  //   // get correct answers
+  //   const correctAnswers = participants.reduce((acc: { id: string; answers: number }[], participant: IQuizParticipant) => {
+  //     const answerMap = new Map(participant.Answers.map((answer) => [answer.questionId, answer.answer]));
+  //     let correct = 0;
+
+  //     participant.Quiz.questions.forEach((question) => {
+  //       const userAnswer = answerMap.get(question.id);
+  //       if (userAnswer === question.answer) {
+  //         correct++;
+  //       }
+  //     });
+
+  //     return [...acc, { id: participant.id, answers: correct }];
+  //   }, []);
+
+  //   // sort by correct answers
+  //   const sortedData = correctAnswers.sort((a, b) => a.answers - b.answers);
+
+  //   // update participants
+  //   const updatedParticipants = sortedData.map((participant: { id: string; answers: number }) => {
+  //     const updatedParticipant = { ...participants.find((p) => p.id === participant.id) };
+  //     updatedParticipant.correctAnswers = participant.answers;
+  //     return updatedParticipant;
+  //   });
+
+  //   console.log(updatedParticipants);
+
+  //   // @ts-ignore
+  //   setParticipants(updatedParticipants);
+  // };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -121,20 +155,57 @@ const QuizParticipants = ({ quizId }: { quizId: string }) => {
     <div className="px-2">
       {isLoading && <div>Loading...</div>}
       {!isLoading && participants.length === 0 && <div>No participants found</div>}
-      {participants.length > 0 && <p>{participants.length} participants</p>}
+
+      {participants.length > 0 && (
+        <div className="flex justify-between items-center">
+          <p>{participants.length} participants</p>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="airplane-mode"
+              // onCheckedChange={(value) => value && generatePercentile()}
+            />
+            <Label htmlFor="airplane-mode">Sort & Percentile</Label>
+          </div>
+        </div>
+      )}
+
       <Accordion type="multiple">
         {participants.map((participant, index) => (
-          <Participant key={participant.id} data={participant} index={index} />
+          <Participant
+            key={participant.id}
+            data={participant}
+            index={index}
+            // rank={participants.findIndex((p) => p.id === participant.id)}
+            // totalParticipants={participants.length}
+          />
         ))}
       </Accordion>
     </div>
   );
 };
 
-const Participant = ({ data, index }: { data: IQuizParticipant; index: number }) => {
+const Participant = ({
+  data,
+  index,
+}: // rank,
+// totalParticipants,
+{
+  data: IQuizParticipant;
+  index: number;
+  // rank: number;
+  // totalParticipants: number;
+}) => {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
+  // const [percentile, setPercentile] = useState(0);
 
+  // useEffect(() => {
+  //   // setPercentile((correctAnswers / (correctAnswers + incorrectAnswers)) * 100);
+
+  //   if (data.correctAnswers) setPercentile((rank / totalParticipants) * 100);
+  // }, [rank, totalParticipants]);
+
+  // count correct and incorrect answers
   useEffect(() => {
     if (!data?.Quiz?.questions || !data.Answers) return;
 
@@ -159,10 +230,13 @@ const Participant = ({ data, index }: { data: IQuizParticipant; index: number })
     <AccordionItem value={index + ""} className="flex flex-col">
       <AccordionTrigger className="p-2 hover:no-underline">
         <p>
-          {index + 1}. {data.User.name} - {!data.isQualified && <span className="text-red-600 text-xs">Disqualified</span>}
+          {index + 1}. {data.User.name} {!data.isQualified && <span className="text-red-600 text-xs">- Disqualified</span>}
+          {/* {data.correctAnswers}, {rank}
+          {percentile} */}
         </p>
       </AccordionTrigger>
       <AccordionContent>
+        {data.anyReason && <p className="text-red-600 px-4 pb-2">Reason: {data.anyReason}</p>}
         <div className="grid grid-cols-2 gap-1 px-4">
           <p className="text-sm">
             <span className="font-medium">Phone:</span> {data.User.phone}
@@ -170,23 +244,20 @@ const Participant = ({ data, index }: { data: IQuizParticipant; index: number })
           <p className="text-sm">
             <span className="font-medium">Email:</span> {data.User.email}
           </p>
-          {data.isQualified && (
-            <>
-              <p className="text-sm">
-                <span className="font-medium">Question Answered:</span> {correctAnswers + incorrectAnswers}
-              </p>
-              <p className="text-sm">
-                <span className="font-medium">Not Answered:</span>{" "}
-                {data.Quiz.questions.length - correctAnswers - incorrectAnswers}
-              </p>
-              <p className="text-sm">
-                <span className="font-medium">Correct Answers:</span> {correctAnswers}
-              </p>
-              <p className="text-sm">
-                <span className="font-medium">Incorrect Answers:</span> {incorrectAnswers}
-              </p>
-            </>
-          )}
+
+          <p className="text-sm">
+            <span className="font-medium">Question Answered:</span> {data.Answers.length}
+          </p>
+          <p className="text-sm">
+            <span className="font-medium">Not Answered:</span> {data.Quiz.questions.length - data.Answers.length}
+          </p>
+          <p className="text-sm">
+            <span className="font-medium">Correct Answers:</span> {correctAnswers}
+          </p>
+          <p className="text-sm">
+            <span className="font-medium">Incorrect Answers:</span> {incorrectAnswers}
+          </p>
+
           <p className="text-sm">
             <span className="font-medium">Submitted on:</span> {data.createdAt.toLocaleString()}
           </p>

@@ -97,7 +97,7 @@ const Page = ({ params }: { params: { id: string } }) => {
       window.removeEventListener("blur", handleWindowBlur);
       // document.removeEventListener("visibilitychange", () => {});
     };
-  }, [user]);
+  }, [user, answers, quizInputs]);
 
   // check if quiz is published or not, and set quiz time
   useEffect(() => {
