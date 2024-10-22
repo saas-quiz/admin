@@ -32,6 +32,8 @@ export function PublishQuiz({
   const [generated, setGenerated] = React.useState(false);
   const [unlinked, setUnlinked] = React.useState(false);
 
+  const app_url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_APP_URL : "http://localhost:3001";
+
   const stopSharing = async () => {
     setUnlinked(true);
     const res = await unPublishQuizDB({ quizId: id });
@@ -70,7 +72,7 @@ export function PublishQuiz({
               Link
             </Label>
             {!generated ? (
-              <Input id="link" defaultValue={process.env.NEXT_PUBLIC_APP_URL + "/share/quiz/" + id} readOnly />
+              <Input id="link" defaultValue={app_url + "/share/quiz/" + id} readOnly />
             ) : (
               <ReloadIcon className="h-4 w-4 animate-spin" />
             )}
@@ -81,7 +83,7 @@ export function PublishQuiz({
             className="px-3"
             disabled={generated}
             onClick={() => {
-              navigator.clipboard.writeText(process.env.NEXT_PUBLIC_APP_URL + "/share/quiz/" + id);
+              navigator.clipboard.writeText(app_url + "/share/quiz/" + id);
               success("Link copied to clipboard");
               setOpen(false);
             }}
