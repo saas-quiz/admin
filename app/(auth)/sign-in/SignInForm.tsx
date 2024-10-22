@@ -125,7 +125,7 @@ const SignInForm = () => {
           disabled={isLoading}
           onClick={() => {
             const res = signIn("google", { redirect: false });
-            console.log(res);
+            // console.log(res);
           }}
         >
           {isLoading ? <CgSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FcGoogle className="mr-2 h-4 w-4" />} Google

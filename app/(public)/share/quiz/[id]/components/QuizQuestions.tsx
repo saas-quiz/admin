@@ -16,8 +16,6 @@ const QuizQuestions = ({
   const clickHandler = useCallback((questionId: string, selectedOption: string) => {
     setAnswers((prevAnswers) => {
       const existingAnswerIndex = prevAnswers.findIndex((answer) => answer.questionId === questionId);
-      console.log(existingAnswerIndex);
-      console.log(questionId, selectedOption);
 
       if (existingAnswerIndex !== -1) {
         // Replace the answer for this question

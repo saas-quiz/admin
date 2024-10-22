@@ -32,7 +32,6 @@ const UserInputs = ({
               onChange={(e) =>
                 setQuizInputs((prev) => {
                   const findIndex = prev.findIndex((i) => i.key === input);
-                  console.log(findIndex);
                   if (findIndex !== -1) {
                     prev[findIndex].value = e.target.value;
                   } else {
