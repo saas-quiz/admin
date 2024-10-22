@@ -72,6 +72,7 @@ model QuizParticipant {
   quizId      String  @db.ObjectId
   groupId     String  @db.ObjectId
   isQualified Boolean @default(false)
+  anyReason   String?
   User        User    @relation(fields: [userId], references: [id])
   Quiz        Quiz    @relation(fields: [quizId], references: [id])
   Group       Group   @relation(fields: [groupId], references: [id])

@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/dist/server/api-utils";
 import { prisma } from "../prisma";
 import { hashPassword } from "../utils";
 
@@ -59,12 +58,16 @@ export const submitParticipantQuizDB = async ({
   groupId,
   answers,
   quizInputs,
+  isQualified,
+  reason,
 }: {
   userId: string;
   quizId: string;
   groupId: string;
-  answers: any;
-  quizInputs: any;
+  answers?: any;
+  quizInputs?: any;
+  isQualified: boolean;
+  reason?: string;
 }) => {
   try {
     const quiz = await prisma.quiz.findUnique({ where: { id: quizId } });
@@ -82,25 +85,30 @@ export const submitParticipantQuizDB = async ({
           userId,
           quizId,
           groupId,
-          isQualified: true,
+          isQualified,
+          anyReason: reason || null,
         },
       });
 
-      await pm.quizInput.createMany({
-        data: quizInputs.map((input: { key: string; value: string }) => ({
-          key: input.key,
-          value: input.value,
-          quizParticipantId: participant.id,
-        })),
-      });
+      if (quizInputs && quizInputs.length !== 0) {
+        await pm.quizInput.createMany({
+          data: quizInputs.map((input: { key: string; value: string }) => ({
+            key: input.key,
+            value: input.value,
+            quizParticipantId: participant.id,
+          })),
+        });
+      }
 
-      await pm.participantQuizAnswer.createMany({
-        data: answers.map((answer: { answer: string; questionId: string }) => ({
-          answer: answer.answer,
-          questionId: answer.questionId,
-          quizParticipantId: participant.id,
-        })),
-      });
+      if (answers && answers.length !== 0) {
+        await pm.participantQuizAnswer.createMany({
+          data: answers.map((answer: { answer: string; questionId: string }) => ({
+            answer: answer.answer,
+            questionId: answer.questionId,
+            quizParticipantId: participant.id,
+          })),
+        });
+      }
     });
     return { ok: true, message: "Quiz submitted successfully" };
   } catch (error: any) {
@@ -130,26 +138,26 @@ export const getQuizParticipantsDB = async ({ quizId }: { quizId: string }) => {
   }
 };
 
-export const disqualifyParticipantDB = async ({
-  userId,
-  quizId,
-  groupId,
-}: {
-  userId: string;
-  quizId: string;
-  groupId: string;
-}) => {
-  try {
-    await prisma.quizParticipant.create({
-      data: {
-        userId,
-        quizId,
-        groupId,
-      },
-    });
-    return { ok: true, message: "Participant disqualified successfully" };
-  } catch (error: any) {
-    console.log(error.message);
-    return { ok: false, error: "Something went wrong" };
-  }
-};
+// export const disqualifyParticipantDB = async ({
+//   userId,
+//   quizId,
+//   groupId,
+// }: {
+//   userId: string;
+//   quizId: string;
+//   groupId: string;
+// }) => {
+//   try {
+//     await prisma.quizParticipant.create({
+//       data: {
+//         userId,
+//         quizId,
+//         groupId,
+//       },
+//     });
+//     return { ok: true, message: "Participant disqualified successfully" };
+//   } catch (error: any) {
+//     console.log(error.message);
+//     return { ok: false, error: "Something went wrong" };
+//   }
+// };

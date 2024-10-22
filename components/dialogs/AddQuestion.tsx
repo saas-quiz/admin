@@ -58,6 +58,12 @@ const AddQuestion = ({
     setData({ ...data, questions: updatedQuestions } as IQuiz);
     setOpen(false);
     success("Question added successfully");
+    setOptions([
+      { key: "a", value: "" },
+      { key: "b", value: "" },
+      { key: "c", value: "" },
+      { key: "d", value: "" },
+    ]);
   };
 
   const handlePaste = (e: any) => {

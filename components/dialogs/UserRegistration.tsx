@@ -20,9 +20,11 @@ import { userRegDB } from "@/lib/actions/user.action";
 import { useRouter } from "next/navigation";
 
 export function UserRegistration({
+  visible,
   setUser,
   quizId,
 }: {
+  visible: boolean;
   quizId: string;
   setUser: React.Dispatch<React.SetStateAction<IUser | null>>;
 }) {
@@ -57,7 +59,9 @@ export function UserRegistration({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 opacity-100">Start Quiz</Button>
+        <Button className="" disabled={!visible}>
+          Start Quiz
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

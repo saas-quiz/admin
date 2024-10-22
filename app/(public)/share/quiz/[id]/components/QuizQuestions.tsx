@@ -49,7 +49,7 @@ const QuizQuestions = ({
               .map((option, index) => (
                 <Label
                   key={`${question.id}-${option.key}`}
-                  className="flex items-top gap-2 text-xs quiz cursor-pointer w-full"
+                  className="flex items-top gap-2 text-sm quiz cursor-pointer w-full"
                   onClick={(e) => {
                     e.stopPropagation();
                     clickHandler(question.id, option.key);

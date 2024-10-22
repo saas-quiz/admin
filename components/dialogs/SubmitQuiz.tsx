@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import React from "react";
-import { error, exitFullScreen, success } from "@/lib/utils";
+import { error, success } from "@/lib/utils";
 import { IParticipantQuizAnswer, IUser } from "@/types";
 import { submitParticipantQuizDB } from "@/lib/actions/user.action";
 import { useRouter } from "next/navigation";
@@ -49,9 +49,9 @@ export function QuizSubmit({
       groupId,
       answers,
       quizInputs,
+      isQualified: true,
     });
 
-    exitFullScreen();
     if (!res.ok) {
       if (res.redirectTo) {
         router.replace(res.redirectTo);
