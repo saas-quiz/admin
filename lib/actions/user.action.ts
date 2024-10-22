@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/dist/server/api-utils";
 import { prisma } from "../prisma";
 import { hashPassword } from "../utils";
 
@@ -34,8 +35,12 @@ export const userRegDB = async ({
       where: { userId_quizId: { userId: user.id, quizId } },
     });
 
-    if (participant) {
+    if (participant && participant.isQualified) {
       return { ok: true, isSubmitted: true, message: "You have already submitted this quiz" };
+    }
+
+    if (participant && !participant.isQualified) {
+      return { ok: true, isDisqualified: true };
     }
 
     return { ok: true, data: user };
@@ -62,12 +67,22 @@ export const submitParticipantQuizDB = async ({
   quizInputs: any;
 }) => {
   try {
+    const quiz = await prisma.quiz.findUnique({ where: { id: quizId } });
+
+    if (!quiz) {
+      return { ok: false, error: "Quiz not found", redirectTo: `/share/quiz/expired?quizId=${quizId}` };
+    }
+    if (!quiz.published) {
+      return { ok: false, error: "Time limit exceeded", redirectTo: `/share/quiz/limit-exceed?quizId=${quizId}` };
+    }
+
     await prisma.$transaction(async (pm) => {
       const participant = await pm.quizParticipant.create({
         data: {
           userId,
           quizId,
           groupId,
+          isQualified: true,
         },
       });
 
@@ -109,6 +124,30 @@ export const getQuizParticipantsDB = async ({ quizId }: { quizId: string }) => {
       },
     });
     return { ok: true, data: participants };
+  } catch (error: any) {
+    console.log(error.message);
+    return { ok: false, error: "Something went wrong" };
+  }
+};
+
+export const disqualifyParticipantDB = async ({
+  userId,
+  quizId,
+  groupId,
+}: {
+  userId: string;
+  quizId: string;
+  groupId: string;
+}) => {
+  try {
+    await prisma.quizParticipant.create({
+      data: {
+        userId,
+        quizId,
+        groupId,
+      },
+    });
+    return { ok: true, message: "Participant disqualified successfully" };
   } catch (error: any) {
     console.log(error.message);
     return { ok: false, error: "Something went wrong" };

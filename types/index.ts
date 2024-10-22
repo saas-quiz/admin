@@ -65,6 +65,7 @@ export interface IQuizParticipant {
   userId: string;
   quizId: string;
   groupId: string;
+  isQualified: boolean;
   User: IUser;
   Quiz: IQuiz;
   Group?: IGroup;

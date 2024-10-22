@@ -67,13 +67,14 @@ model GroupMember {
 }
 
 model QuizParticipant {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  userId  String @db.ObjectId
-  quizId  String @db.ObjectId
-  groupId String @db.ObjectId
-  User    User   @relation(fields: [userId], references: [id])
-  Quiz    Quiz   @relation(fields: [quizId], references: [id])
-  Group   Group  @relation(fields: [groupId], references: [id])
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String  @db.ObjectId
+  quizId      String  @db.ObjectId
+  groupId     String  @db.ObjectId
+  isQualified Boolean @default(false)
+  User        User    @relation(fields: [userId], references: [id])
+  Quiz        Quiz    @relation(fields: [quizId], references: [id])
+  Group       Group   @relation(fields: [groupId], references: [id])
 
   Answers    ParticipantQuizAnswer[]
   QuizInputs QuizInput[]

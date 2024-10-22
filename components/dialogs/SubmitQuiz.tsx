@@ -1,11 +1,8 @@
 "use client";
 
-import { CopyIcon, ReloadIcon } from "@radix-ui/react-icons";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -13,11 +10,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import React, { useEffect } from "react";
-import { publishQuizDB } from "@/lib/actions/quiz.actions";
-import { error, success } from "@/lib/utils";
+import React from "react";
+import { error, exitFullScreen, success } from "@/lib/utils";
 import { IParticipantQuizAnswer, IUser } from "@/types";
 import { submitParticipantQuizDB } from "@/lib/actions/user.action";
 import { useRouter } from "next/navigation";
@@ -44,7 +38,6 @@ export function QuizSubmit({
 
   const submitHandler = async () => {
     if (quizInputs.length !== userInputs) {
-      console.log(quizInputs.length, userInputs);
       error("Please fill all inputs", 2000, true);
       setOpen(false);
       return;
@@ -58,7 +51,13 @@ export function QuizSubmit({
       quizInputs,
     });
 
+    exitFullScreen();
     if (!res.ok) {
+      if (res.redirectTo) {
+        router.replace(res.redirectTo);
+        return;
+      }
+
       error(res.error!, 3000, true);
       setOpen(false);
       return;

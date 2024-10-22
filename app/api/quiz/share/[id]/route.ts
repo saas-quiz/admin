@@ -14,6 +14,10 @@ export async function GET(req: NextRequest) {
       },
     });
 
+    if (!quiz?.published) {
+      return NextResponse.json({ ok: true, error: "This link is not valid!", quiz }, { status: 400 });
+    }
+
     return NextResponse.json({ ok: true, message: "Data fetched successfully", quiz }, { status: 200 });
   } catch (error: any) {
     console.error(error?.message);

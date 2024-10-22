@@ -16,6 +16,19 @@ export const publishQuizDB = async ({ quizId }: { quizId: string }) => {
   }
 };
 
+export const unPublishQuizDB = async ({ quizId }: { quizId: string }) => {
+  try {
+    const res = await prisma.quiz.update({
+      where: { id: quizId },
+      data: { published: false },
+    });
+    return { ok: true, data: res };
+  } catch (error: any) {
+    console.error(error?.message);
+    return { ok: false, error: "Something went wrong" };
+  }
+};
+
 export const getQuizDB = async ({ id }: { id: string }) => {
   try {
     const res = await prisma.quiz.findUnique({

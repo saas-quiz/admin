@@ -1,11 +1,9 @@
 "use client";
 
-import { CopyIcon, ReloadIcon } from "@radix-ui/react-icons";
-
+import { ReloadIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -15,10 +13,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import React, { useEffect } from "react";
-import { publishQuizDB } from "@/lib/actions/quiz.actions";
-import { error, success } from "@/lib/utils";
-import { IParticipantQuizAnswer, IUser } from "@/types";
+import React from "react";
+import { enterFullScreen, error } from "@/lib/utils";
+import { IUser } from "@/types";
 import { userRegDB } from "@/lib/actions/user.action";
 import { useRouter } from "next/navigation";
 
@@ -47,7 +44,11 @@ export function UserRegistration({
     if (res.isSubmitted) {
       router.replace(`/share/quiz/sb?quizId=${quizId}`);
     }
+    if (res.isDisqualified) {
+      router.replace(`/share/quiz/disqualified?quizId=${quizId}`);
+    }
     if (res.data) {
+      enterFullScreen();
       setUser({ id: res.data.id, name: res.data.name!, email: res.data.email, phone: res.data.phone! });
     }
     setOpen(false);

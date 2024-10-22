@@ -74,7 +74,7 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
             </div>
           </div>
 
-          <PublishQuiz id={data.id} isPublished={data.published} />
+          <PublishQuiz id={data.id} isPublished={data.published} setData={setData} />
 
           <QuizHeader title={data.title} images={data.images || []} editable />
           <UserInputs inputs={data.userInputs} editable />
@@ -158,7 +158,9 @@ const Participant = ({ data, index }: { data: IQuizParticipant; index: number })
   return (
     <AccordionItem value={index + ""} className="flex flex-col">
       <AccordionTrigger className="p-2 hover:no-underline">
-        {index + 1}. {data.User.name}
+        <p>
+          {index + 1}. {data.User.name} - {!data.isQualified && <span className="text-red-600 text-xs">Disqualified</span>}
+        </p>
       </AccordionTrigger>
       <AccordionContent>
         <div className="grid grid-cols-2 gap-1 px-4">
@@ -168,19 +170,23 @@ const Participant = ({ data, index }: { data: IQuizParticipant; index: number })
           <p className="text-sm">
             <span className="font-medium">Email:</span> {data.User.email}
           </p>
-          <p className="text-sm">
-            <span className="font-medium">Question Answered:</span> {correctAnswers + incorrectAnswers}
-          </p>
-          <p className="text-sm">
-            <span className="font-medium">Not Answered:</span>{" "}
-            {data.Quiz.questions.length - correctAnswers - incorrectAnswers}
-          </p>
-          <p className="text-sm">
-            <span className="font-medium">Correct Answers:</span> {correctAnswers}
-          </p>
-          <p className="text-sm">
-            <span className="font-medium">Incorrect Answers:</span> {incorrectAnswers}
-          </p>
+          {data.isQualified && (
+            <>
+              <p className="text-sm">
+                <span className="font-medium">Question Answered:</span> {correctAnswers + incorrectAnswers}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Not Answered:</span>{" "}
+                {data.Quiz.questions.length - correctAnswers - incorrectAnswers}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Correct Answers:</span> {correctAnswers}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Incorrect Answers:</span> {incorrectAnswers}
+              </p>
+            </>
+          )}
           <p className="text-sm">
             <span className="font-medium">Submitted on:</span> {data.createdAt.toLocaleString()}
           </p>

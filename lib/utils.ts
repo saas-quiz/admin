@@ -42,3 +42,44 @@ export const uploadImageAPI = async (file: File) => {
   const response = await fetch("/api/image", { method: "POST", body: formData });
   return await response.json();
 };
+
+export const exitFullScreen = () => {
+  try {
+    if (document) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        // @ts-ignore
+      } else if (document.mozCancelFullScreen) {
+        // @ts-ignore // Firefox
+        document.mozCancelFullScreen();
+        // @ts-ignore
+      } else if (document.webkitExitFullscreen) {
+        // @ts-ignore // Chrome, Safari, Opera
+        document.webkitExitFullscreen();
+        // @ts-ignore
+      } else if (document.msExitFullscreen) {
+        // @ts-ignore // IE/Edge
+        document.msExitFullscreen();
+      }
+    }
+  } catch (error: any) {}
+};
+
+export const enterFullScreen = () => {
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+    // @ts-ignore
+  } else if (elem.mozRequestFullScreen) {
+    // @ts-ignore // Firefox
+    elem.mozRequestFullScreen();
+    // @ts-ignore
+  } else if (elem.webkitRequestFullscreen) {
+    // @ts-ignore // Chrome, Safari, Opera
+    elem.webkitRequestFullscreen();
+    // @ts-ignore
+  } else if (elem.msRequestFullscreen) {
+    // @ts-ignore // IE/Edge
+    elem.msRequestFullscreen();
+  }
+};
