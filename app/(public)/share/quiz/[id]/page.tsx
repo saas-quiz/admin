@@ -166,7 +166,7 @@ const Page = ({ params }: { params: { id: string } }) => {
           <QuizHeader title={data.quiz.title} images={data.quiz.images} />
 
           <div className="px-1 flex flex-col gap-4">
-            <UserInputs inputs={data.quiz.userInputs} user={user} setQuizInputs={setQuizInputs} />
+            {user && <UserInputs inputs={data.quiz.userInputs} user={user} setQuizInputs={setQuizInputs} />}
             <QuizInfo duration={data.quiz.duration} maxMarks={data.quiz.maxMarks} />
             <QuizDesc desc={data.quiz.desc} />
 
