@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Fonts from "../fonts/outfit";
 import { Toaster } from "@/components/ui/toaster";
 import { SiPlatformdotsh } from "react-icons/si";
-import Link from "next/link";
 import "../globals.css";
+import Image from "next/image";
+import background from "@/app/assets/quiz.webp";
 
 export const metadata: Metadata = {
   title: "Quiz App",
@@ -26,6 +27,9 @@ export default function RootLayout({
             <div className="relative z-20 flex items-center text-lg font-medium">
               <SiPlatformdotsh className="mr-5" />
               SaaS Quiz
+            </div>
+            <div className="opacity-20 w-full h-full flex py-5">
+              <Image src={background} alt="Quiz App" width={0} height={0} sizes="100vw" className="w-full object-cover" />
             </div>
             <div className="relative z-20 mt-auto">
               <blockquote className="space-y-2">
