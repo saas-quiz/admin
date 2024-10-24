@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { error, success } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Session } from "next-auth";
+import Link from "next/link";
 
 const OnBoardingForm = ({ session }: { session: Session }) => {
   const router = useRouter();
@@ -49,7 +50,7 @@ const OnBoardingForm = ({ session }: { session: Session }) => {
               id="name"
               placeholder="John Doe"
               type="text"
-              value={name}
+              value={session?.user?.name || name}
               onChange={(e) => setName(e.target.value)}
               autoCapitalize="on"
               autoComplete="name"
@@ -79,6 +80,17 @@ const OnBoardingForm = ({ session }: { session: Session }) => {
           </Button>
         </div>
       </form>
+      <p className="px-8 text-center text-xs text-muted-foreground">
+        By clicking continue, you agree to our{" "}
+        <Link href="#" className="underline underline-offset-4 hover:text-primary">
+          Terms of Service
+        </Link>{" "}
+        and{" "}
+        <Link href="#" className="underline underline-offset-4 hover:text-primary">
+          Privacy Policy
+        </Link>
+        .
+      </p>
     </div>
   );
 };

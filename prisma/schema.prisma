@@ -29,6 +29,9 @@ model User {
   role        Role[]  @default([USER])
   isOnBoarded Boolean @default(false)
 
+  resetToken       String?
+  resetTokenExpiry DateTime?
+
   quizzes QuizParticipant[] // student quizzes
   // requests Request[] // student requests to join quiz
 

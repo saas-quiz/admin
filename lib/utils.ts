@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 import { twMerge } from "tailwind-merge";
 import { compareSync, hashSync } from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -20,6 +21,14 @@ export const error = (msg: string, duration?: number, noTitle?: boolean) =>
   toast({ title: noTitle ? "" : "Error", description: msg, variant: "destructive", duration: duration || 3000 });
 export const success = (msg: string, type?: "success" | "default", action?: ReactElement) =>
   toast({ title: "Success", description: msg, variant: type || "default", action });
+
+// generate a random string for resetpassword link at least 50 characters long
+export const generateResetPasswordToken = () => {
+  const token = crypto.randomBytes(32).toString("hex");
+  const hashToken = hashPassword(token);
+
+  return { token, hashToken };
+};
 
 export const hashPassword = (password: string) => hashSync(password, 10);
 export const comparePassword = (password: string, hash: string) => compareSync(password, hash);

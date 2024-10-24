@@ -132,6 +132,17 @@ const RegisterForm = () => {
           Sign In
         </Link>
       </div>
+      <p className="px-8 text-center text-xs text-muted-foreground">
+        By clicking continue, you agree to our{" "}
+        <Link href="#" className="underline underline-offset-4 hover:text-primary">
+          Terms of Service
+        </Link>{" "}
+        and{" "}
+        <Link href="#" className="underline underline-offset-4 hover:text-primary">
+          Privacy Policy
+        </Link>
+        .
+      </p>
     </>
   );
 };

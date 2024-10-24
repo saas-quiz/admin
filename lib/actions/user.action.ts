@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "../prisma";
-import { hashPassword } from "../utils";
+import { comparePassword, hashPassword } from "../utils";
 
 export const userRegDB = async ({
   name,
@@ -161,3 +161,67 @@ export const getQuizParticipantsDB = async ({ quizId }: { quizId: string }) => {
 //     return { ok: false, error: "Something went wrong" };
 //   }
 // };
+
+export const findUserByEmailDB = async ({ email }: { email: string }) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return { ok: false, error: "No user found with this email" };
+    }
+    return { ok: true, data: user };
+  } catch (error: any) {
+    console.log(error.message);
+    return { ok: false, error: "Something went wrong" };
+  }
+};
+
+export const saveResetTokenDB = async ({ email, token }: { email: string; token: string }) => {
+  try {
+    await prisma.user.update({
+      where: { email },
+      data: { resetToken: token, resetTokenExpiry: new Date(Date.now() + 3600000) },
+    });
+
+    return { ok: true, message: "Reset token updated successfully" };
+  } catch (error: any) {
+    console.log(error.message);
+    return { ok: false, error: "Something went wrong" };
+  }
+};
+
+export const verifyAndResetPasswordDB = async ({
+  token,
+  email,
+  password,
+}: {
+  token: string;
+  email: string;
+  password: string;
+}) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return { ok: false, error: "No user found with this email" };
+    }
+
+    const isTokenValid = comparePassword(token, user.resetToken!);
+    if (!isTokenValid) {
+      return { ok: false, error: "Invalid reset token" };
+    }
+
+    const now = new Date();
+    if (now > user.resetTokenExpiry!) {
+      return { ok: false, error: "Reset token expired" };
+    }
+
+    await prisma.user.update({
+      where: { email },
+      data: { password: hashPassword(password), resetToken: "", resetTokenExpiry: null },
+    });
+
+    return { ok: true, message: "Token verified successfully" };
+  } catch (error: any) {
+    console.log(error.message);
+    return { ok: false, error: "Something went wrong" };
+  }
+};

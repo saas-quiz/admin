@@ -25,33 +25,25 @@ export default function RootLayout({
             <div className="absolute inset-0 bg-zinc-900" />
             <div className="relative z-20 flex items-center text-lg font-medium">
               <SiPlatformdotsh className="mr-5" />
-              Quiz App
+              SaaS Quiz
             </div>
             <div className="relative z-20 mt-auto">
               <blockquote className="space-y-2">
                 <p className="text-lg">
-                  &ldquo;This is the introduction paragraph. It should be at least 150 characters long&rdquo;
+                  &ldquo;SaaS Quiz is your go-to platform for creating, managing, and taking quizzes with ease. Designed for
+                  flexibility, our system supports everything from academic assessments to corporate training, ensuring a
+                  seamless experience across industries.&rdquo;
                 </p>
-                <footer className="text-sm">Sandeep Kumar</footer>
+                <p>
+                  Log in to explore a powerful set of tools tailored for quizzes, performance tracking, and collaboration.
+                </p>
+                <footer className="text-sm mt-5">Sandeep Kumar</footer>
               </blockquote>
             </div>
           </div>
 
           <div className="p-2">
-            <div className="mx-auto flex w-full flex-col px-5 sm:w-[400px]">
-              {children}
-              <p className="px-8 text-center text-xs text-muted-foreground">
-                By clicking continue, you agree to our{" "}
-                <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link href="/privacy" className="underline underline-offset-4 hover:text-primary">
-                  Privacy Policy
-                </Link>
-                .
-              </p>
-            </div>
+            <div className="mx-auto flex w-full flex-col px-5 sm:w-[400px]">{children}</div>
           </div>
         </div>
 
