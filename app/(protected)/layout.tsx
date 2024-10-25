@@ -44,8 +44,8 @@ export default async function RootLayout({
             </div>
           </div>
           <div className="flex flex-col">
-            <Header />
-            <main className="flex flex-1 flex-col gap-4 p-2 lg:gap-6 lg:p-4">
+            <Header session={session} />
+            <main className="flex flex-1 flex-col gap-4 xs:p-2 lg:gap-6 lg:p-4">
               <AuthProvider>{children}</AuthProvider>
             </main>
           </div>
