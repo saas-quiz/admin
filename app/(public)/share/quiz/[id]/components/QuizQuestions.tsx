@@ -1,7 +1,6 @@
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { IParticipantQuizAnswer, IQuestion, IQuiz } from "@/types";
+import { IParticipantQuizAnswer, IQuestion } from "@/types";
 import React, { useCallback } from "react";
 
 const QuizQuestions = ({
@@ -35,7 +34,7 @@ const QuizQuestions = ({
     <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 px-1">
       {questions.map((question, index) => (
         <div key={question.id} className={`flex flex-col gap-1 group relative rounded`}>
-          <div className="flex gap-2 text-sm font-medium">
+          <div className="flex gap-2 text-sm font-semibold">
             <span>{index + 1}.</span>
             <p>{question.title}</p>
           </div>
@@ -49,7 +48,7 @@ const QuizQuestions = ({
               .map((option, index) => (
                 <Label
                   key={`${question.id}-${option.key}`}
-                  className="flex items-top gap-2 text-sm quiz cursor-pointer w-full"
+                  className="flex items-start gap-1.5 text-sm quiz cursor-pointer w-full"
                   onClick={(e) => {
                     e.stopPropagation();
                     clickHandler(question.id, option.key);
@@ -60,10 +59,12 @@ const QuizQuestions = ({
                     checked={answers.find((answer) => answer.questionId === question.id)?.answer === option.key}
                     value={option.key}
                     id={`${question.id}-${option.key}`}
-                    className="h-4 w-4"
+                    className="h-4 w-4 mt-[0.5px]"
                   />
-                  <span>({option.key})</span>
-                  <Label htmlFor={option.key}>{option.value}</Label>
+                  <span className="-mt-0.5">({option.key})</span>
+                  <Label className="mt-[1px]" htmlFor={option.key}>
+                    {option.value}
+                  </Label>
                 </Label>
               ))}
           </RadioGroup>

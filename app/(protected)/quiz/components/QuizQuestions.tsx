@@ -36,7 +36,7 @@ const QuizQuestions = ({
             {question.options
               .sort((a, b) => a.key.localeCompare(b.key))
               .map((option, index) => (
-                <div key={option.id} className="flex items-center gap-2 text-xs">
+                <div key={option.id} className="flex gap-2 text-xs">
                   <span>({option.key})</span>
                   <p>{option.value}</p>
                 </div>
