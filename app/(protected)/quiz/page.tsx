@@ -113,41 +113,41 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
 
 const QuizParticipants = ({ quizId, questions }: { quizId: string; questions: IQuestion[] }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPercentile, setShowPercentile] = useState(false);
   const [participants, setParticipants] = useState<IQuizParticipant[]>([]);
 
-  // const generatePercentile = () => {
-  //   // get correct answers
-  //   const correctAnswers = participants.reduce((acc: { id: string; answers: number }[], participant: IQuizParticipant) => {
-  //     const answerMap = new Map(participant.Answers.map((answer) => [answer.questionId, answer.answer]));
-  //     let correct = 0;
+  const generatePercentile = () => {
+    // get correct answers for each participant
+    const correctAnswers = participants.reduce((acc: { id: string; answers: number }[], participant: IQuizParticipant) => {
+      const answerMap = new Map(participant.Answers.map((answer) => [answer.questionId, answer.answer]));
+      let correct = 0;
 
-  //     participant.Quiz.questions.forEach((question) => {
-  //       const userAnswer = answerMap.get(question.id);
-  //       if (userAnswer === question.answer) {
-  //         correct++;
-  //       }
-  //     });
+      questions.forEach((question) => {
+        const userAnswer = answerMap.get(question.id);
+        if (userAnswer === question.answer) {
+          correct++;
+        }
+      });
 
-  //     return [...acc, { id: participant.id, answers: correct }];
-  //   }, []);
+      return [...acc, { id: participant.id, answers: correct }];
+    }, []);
 
-  //   // sort by correct answers
-  //   const sortedData = correctAnswers.sort((a, b) => a.answers - b.answers);
+    // sort by correct answers
+    const sortedData = correctAnswers.sort((a, b) => b.answers - a.answers);
 
-  //   // update participants
-  //   const updatedParticipants = sortedData.map((participant: { id: string; answers: number }) => {
-  //     const updatedParticipant = { ...participants.find((p) => p.id === participant.id) };
-  //     updatedParticipant.correctAnswers = participant.answers;
-  //     return updatedParticipant;
-  //   });
+    const updatedParticipants = sortedData.map((participant: { id: string; answers: number }, index: number) => {
+      const updatedParticipant = { ...participants.find((p) => p.id === participant.id) };
+      updatedParticipant.percentile = (((sortedData.length - (index + 1)) / participants.length) * 100).toFixed(2);
+      return updatedParticipant;
+    });
 
-  //   console.log(updatedParticipants);
+    // @ts-ignore
+    setParticipants(updatedParticipants);
+  };
 
-  //   // @ts-ignore
-  //   setParticipants(updatedParticipants);
-  // };
-
-  console.log(participants);
+  useEffect(() => {
+    if (showPercentile) generatePercentile();
+  }, [showPercentile]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -167,45 +167,25 @@ const QuizParticipants = ({ quizId, questions }: { quizId: string; questions: IQ
       {participants.length > 0 && (
         <div className="flex justify-between items-center">
           <p>{participants.length} participants</p>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="airplane-mode"
-              // onCheckedChange={(value) => value && generatePercentile()}
-            />
-            <Label htmlFor="airplane-mode">Sort & Percentile</Label>
-          </div>
+          {!showPercentile && (
+            <div className="flex items-center space-x-2">
+              <Switch id="airplane-mode" checked={showPercentile} onCheckedChange={setShowPercentile} />
+              <Label htmlFor="airplane-mode">Sort & Percentile</Label>
+            </div>
+          )}
         </div>
       )}
 
       <Accordion type="multiple">
         {participants.map((participant, index) => (
-          <Participant
-            key={participant.id}
-            data={participant}
-            questions={questions}
-            index={index}
-            // rank={participants.findIndex((p) => p.id === participant.id)}
-            // totalParticipants={participants.length}
-          />
+          <Participant key={participant.id} data={participant} questions={questions} index={index} />
         ))}
       </Accordion>
     </div>
   );
 };
 
-const Participant = ({
-  data,
-  questions,
-  index,
-}: // rank,
-// totalParticipants,
-{
-  data: IQuizParticipant;
-  questions: IQuestion[];
-  index: number;
-  // rank: number;
-  // totalParticipants: number;
-}) => {
+const Participant = ({ data, questions, index }: { data: IQuizParticipant; questions: IQuestion[]; index: number }) => {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
   const [showResult, setShowResult] = useState(false);
@@ -220,14 +200,6 @@ const Participant = ({
       isCorrect: boolean;
     }[]
   >([]);
-  // const [percentile, setPercentile] = useState(0);
-
-  // useEffect(() => {
-  //   // setPercentile((correctAnswers / (correctAnswers + incorrectAnswers)) * 100);
-
-  //   if (data.correctAnswers) setPercentile((rank / totalParticipants) * 100);
-  // }, [rank, totalParticipants]);
-
   // count correct and incorrect answers
   useEffect(() => {
     if (!data.Answers) return;
@@ -268,11 +240,15 @@ const Participant = ({
   return (
     <AccordionItem value={index + ""} className="flex flex-col">
       <AccordionTrigger className="p-2 hover:no-underline">
-        <p>
+        <div className="flex justify-between w-full mr-2">
           {index + 1}. {data.User.name} {!data.isQualified && <span className="text-red-600 text-xs">- Disqualified</span>}
-          {/* {data.correctAnswers}, {rank}
-          {percentile} */}
-        </p>
+          {data.percentile && (
+            <span className="flex items-start">
+              {data.percentile}
+              <span className="text-[10px] ml-[2px] mt-[-2px]">th</span>
+            </span>
+          )}
+        </div>
       </AccordionTrigger>
       <AccordionContent>
         {data.anyReason && <p className="text-red-600 px-4 pb-2">Reason: {data.anyReason}</p>}

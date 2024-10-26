@@ -77,7 +77,7 @@ export interface IQuizParticipant {
   Quiz: IQuiz;
   Group?: IGroup;
 
-  correctAnswers?: number;
+  percentile?: string;
   Answers: IParticipantQuizAnswer[];
   QuizInputs: { id: string; key: string; value: string; quizParticipantId: string }[];
   createdAt: Date;
