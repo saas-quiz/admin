@@ -5,10 +5,10 @@ import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import { error, success } from "@/lib/utils";
+import { error, success, translateTextApi } from "@/lib/utils";
 import { updateQuestionDB } from "@/lib/actions/quiz.actions";
 import { IQuestion, IQuiz } from "@/types";
-import { Pencil2Icon } from "@radix-ui/react-icons";
+import { Pencil2Icon, ReloadIcon } from "@radix-ui/react-icons";
 import { Loader2 } from "lucide-react";
 
 const EditQuestion = ({
@@ -20,10 +20,19 @@ const EditQuestion = ({
   data: IQuiz | null;
   setData?: React.Dispatch<React.SetStateAction<IQuiz | null>>;
 }) => {
+  const translate = {
+    enable: data?.translationEnabled,
+    source: data?.sourceLanguage,
+    target: data?.targetLanguage,
+  };
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [title, setTitle] = React.useState(question.title);
-  const [options, setOptions] = React.useState<{ id: string; key: string; value: string }[]>(question.options);
+  const [translatedTitle, setTranslatedTitle] = React.useState(question.translatedTitle);
+  const [translateLoading, setTranslateLoading] = React.useState(false);
+  const [options, setOptions] = React.useState<{ id: string; key: string; value: string; translatedValue: string }[]>(
+    question.options
+  );
   const [answer, setAnswer] = React.useState(question.answer);
 
   const handleSubmit = async () => {
@@ -42,7 +51,7 @@ const EditQuestion = ({
 
     // add question
     setLoading(true);
-    const res = await updateQuestionDB({ title, options, answer, questionId: question.id });
+    const res = await updateQuestionDB({ title, translatedTitle, options, answer, questionId: question.id });
     setLoading(false);
     if (!res.ok) return error(res.error!);
 
@@ -51,6 +60,28 @@ const EditQuestion = ({
     setData && setData({ ...data, questions: updatedQuestions } as IQuiz);
     setOpen(false);
     success("Question updated successfully");
+  };
+
+  const handleTranslate = async () => {
+    if (translate.source && translate.target) {
+      setTranslateLoading(true);
+      try {
+        if (title) setTranslatedTitle(await translateTextApi(title, translate.source, translate.target));
+        const translatedOptions = options.map(async (option) => {
+          if (option.value)
+            return {
+              ...option,
+              translatedValue: await translateTextApi(option.value, translate.source!, translate.target!),
+            };
+          return option;
+        });
+        setOptions(await Promise.all(translatedOptions));
+      } catch (err: any) {
+        error("Translation failed");
+      } finally {
+        setTranslateLoading(false);
+      }
+    }
   };
 
   return (
@@ -71,24 +102,55 @@ const EditQuestion = ({
             onChange={(e) => setTitle(e.target.value)}
             className="w-full font-medium"
           />
+          {translatedTitle && (
+            <Input
+              id="question"
+              placeholder="question"
+              value={translatedTitle}
+              onChange={(e) => setTranslatedTitle(e.target.value)}
+              className="w-full h-7 border-none shadow-none focus-visible:ring-gray-300"
+            />
+          )}
         </div>
         <div className="grid items-center gap-1.5">
-          <Label htmlFor="question">Options</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="question">Options</Label>
+            {translate.enable && (
+              <Button variant={"outline"} size={"sm"} onClick={handleTranslate}>
+                {translateLoading ? <ReloadIcon className="w-3 h-3 animate-spin mr-2" /> : ""} Translate
+              </Button>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-2">
-            {["a", "b", "c", "d"].map((o, i) => (
+            {options.map((o, i) => (
               <div key={i} className="flex items-center gap-1">
-                <Label htmlFor="option1">({o})</Label>
-                <Input
-                  id="option1"
-                  placeholder={`option ${i + 1}`}
-                  value={options.find((opt) => opt.key === o)?.value || ""}
-                  onChange={(e) => {
-                    const newOptions = [...options];
-                    newOptions[i] = { id: options[i].id, key: o, value: e.target.value };
-                    setOptions(newOptions);
-                  }}
-                  className="w-full"
-                />
+                <Label htmlFor="option1">({o.key})</Label>
+                <div className="flex flex-col gap-1">
+                  <Input
+                    id="option1"
+                    placeholder={`option ${i + 1}`}
+                    value={o.value}
+                    onChange={(e) => {
+                      const newOptions = [...options];
+                      newOptions[i].value = e.target.value;
+                      setOptions(newOptions);
+                    }}
+                    className="w-full"
+                  />
+                  {o.translatedValue && (
+                    <Input
+                      id="option1"
+                      placeholder={`option ${i + 1}`}
+                      value={o.translatedValue}
+                      onChange={(e) => {
+                        const newOptions = [...options];
+                        newOptions[i].translatedValue = e.target.value;
+                        setOptions(newOptions);
+                      }}
+                      className="w-full h-7 border-none shadow-none focus-visible:ring-gray-300"
+                    />
+                  )}
+                </div>
               </div>
             ))}
           </div>

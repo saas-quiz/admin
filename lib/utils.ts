@@ -92,3 +92,21 @@ export const enterFullScreen = () => {
     elem.msRequestFullscreen();
   }
 };
+
+export const translateTextApi = async (text: string, source: string, target: string) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_TRANSLATION_API}/translate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      q: text,
+      source,
+      target,
+      format: "html",
+    }),
+  });
+  const data = await response.json();
+  if (!data.translatedText) return text;
+  return data.translatedText;
+};

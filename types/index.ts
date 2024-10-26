@@ -30,6 +30,10 @@ export interface IQuiz {
   groupId: string;
   published: boolean;
 
+  translationEnabled: boolean;
+  sourceLanguage?: string;
+  targetLanguage?: string;
+
   questions: IQuestion[];
   images?: IImage[];
   participants?: IQuizParticipant[];
@@ -39,6 +43,7 @@ export interface IQuiz {
 export interface IQuestion {
   id: string;
   title: string;
+  translatedTitle: string;
   answer: string;
   quizId: string;
   options: IOption[];
@@ -48,6 +53,7 @@ export interface IOption {
   id: string;
   key: string;
   value: string;
+  translatedValue: string;
   questionId: string;
 }
 
@@ -78,10 +84,10 @@ export interface IQuizParticipant {
 }
 
 export interface IParticipantQuizAnswer {
-  id: string;
+  id?: string;
   answer: string;
   questionId: string;
-  Question: IQuestion;
-  quizParticipantId: string;
-  QuizParticipant: IQuizParticipant;
+  Question?: IQuestion;
+  quizParticipantId?: string;
+  QuizParticipant?: IQuizParticipant;
 }

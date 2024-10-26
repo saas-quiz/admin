@@ -46,7 +46,19 @@ export const getQuizDB = async ({ id }: { id: string }) => {
 
 export const createQuizDB = async (
   values: { [k: string]: FormDataEntryValue },
-  { author, groupId, userInputs, images }: { author: string; groupId: string; userInputs: string[]; images: IImage[] }
+  {
+    author,
+    groupId,
+    userInputs,
+    images,
+    translation,
+  }: {
+    author: string;
+    groupId: string;
+    userInputs: string[];
+    images: IImage[];
+    translation: { enable: boolean; sourceLanguage: string; targetLanguage: string };
+  }
 ) => {
   try {
     const res = await prisma.$transaction(async (pm) => {
@@ -64,6 +76,9 @@ export const createQuizDB = async (
           footerLink: values.footerLink as string,
           author: author,
           groupId: groupId,
+          translationEnabled: translation.enable,
+          sourceLanguage: translation.sourceLanguage,
+          targetLanguage: translation.targetLanguage,
         },
         include: { images: true },
       });
@@ -163,15 +178,18 @@ export const deleteQuizDB = async ({ quizId }: { quizId: string }) => {
 
 export const addQuestionDB = async ({
   title,
+  translatedTitle,
   answer,
   options,
   quizId,
 }: {
   title: string;
+  translatedTitle: string;
   answer: string;
   options: {
     key: string;
     value: string;
+    translatedValue: string;
   }[];
   quizId: string;
 }) => {
@@ -180,6 +198,7 @@ export const addQuestionDB = async ({
       const question = await pm.question.create({
         data: {
           title,
+          translatedTitle,
           answer,
           quizId,
         },
@@ -188,6 +207,7 @@ export const addQuestionDB = async ({
       const allOptions = options.map((option) => ({
         key: option.key,
         value: option.value,
+        translatedValue: option.translatedValue,
         questionId: question.id,
       }));
 
@@ -224,16 +244,19 @@ export const addQuestionDB = async ({
 export const updateQuestionDB = async ({
   questionId,
   title,
+  translatedTitle,
   answer,
   options,
 }: {
   questionId: string;
   title: string;
+  translatedTitle: string;
   answer: string;
   options: {
     id: string;
     key: string;
     value: string;
+    translatedValue: string;
   }[];
 }) => {
   try {
@@ -242,6 +265,7 @@ export const updateQuestionDB = async ({
         where: { id: questionId },
         data: {
           title,
+          translatedTitle,
           answer,
         },
       });
@@ -251,6 +275,7 @@ export const updateQuestionDB = async ({
           where: { id: option.id },
           data: {
             value: option.value,
+            translatedValue: option.translatedValue,
           },
         });
       });

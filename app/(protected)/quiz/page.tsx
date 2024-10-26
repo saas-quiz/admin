@@ -51,7 +51,7 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   }
 
   return (
-    <Tabs defaultValue="details" className="w-full">
+    <Tabs defaultValue="details" className="w-full p-2">
       <TabsList className="w-full">
         <TabsTrigger value="details" className="w-full">
           Details
@@ -83,7 +83,12 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
           <QuizInfo duration={data.duration} maxMarks={data.maxMarks} editable />
           <QuizDesc desc={data.desc} editable />
 
-          <AddQuestion quizId={data.id} data={data} setData={setData} />
+          <AddQuestion
+            quizId={data.id}
+            data={data}
+            setData={setData}
+            translate={{ enable: data.translationEnabled, source: data.sourceLanguage, target: data.targetLanguage }}
+          />
           <QuizQuestions questions={data.questions} data={data} setData={setData} editable />
 
           <QuizFooter

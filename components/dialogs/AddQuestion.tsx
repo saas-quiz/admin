@@ -5,28 +5,33 @@ import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import { error, success } from "@/lib/utils";
+import { error, success, translateTextApi } from "@/lib/utils";
 import { addQuestionDB } from "@/lib/actions/quiz.actions";
 import { IQuiz } from "@/types";
 import { Loader2 } from "lucide-react";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 const AddQuestion = ({
   quizId,
   data,
   setData,
+  translate,
 }: {
   quizId: string;
   data: IQuiz | null;
   setData: React.Dispatch<React.SetStateAction<IQuiz | null>>;
+  translate: { enable: boolean; source?: string; target?: string };
 }) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [title, setTitle] = React.useState("");
-  const [options, setOptions] = React.useState<{ key: string; value: string }[]>([
-    { key: "a", value: "" },
-    { key: "b", value: "" },
-    { key: "c", value: "" },
-    { key: "d", value: "" },
+  const [translatedTitle, setTranslatedTitle] = React.useState("");
+  const [translateLoading, setTranslateLoading] = React.useState(false);
+  const [options, setOptions] = React.useState<{ key: string; value: string; translatedValue: string }[]>([
+    { key: "a", value: "", translatedValue: "" },
+    { key: "b", value: "", translatedValue: "" },
+    { key: "c", value: "", translatedValue: "" },
+    { key: "d", value: "", translatedValue: "" },
   ]);
   const [answer, setAnswer] = React.useState("");
 
@@ -46,10 +51,12 @@ const AddQuestion = ({
 
     // add question
     setLoading(true);
-    const res = await addQuestionDB({ title, options, answer, quizId });
+    console.log(options);
+    const res = await addQuestionDB({ title, translatedTitle, options, answer, quizId });
     setLoading(false);
     if (!res.ok) return error(res.error!);
     setTitle("");
+    setTranslatedTitle("");
     setOptions([]);
     setAnswer("");
 
@@ -59,10 +66,10 @@ const AddQuestion = ({
     setOpen(false);
     success("Question added successfully");
     setOptions([
-      { key: "a", value: "" },
-      { key: "b", value: "" },
-      { key: "c", value: "" },
-      { key: "d", value: "" },
+      { key: "a", value: "", translatedValue: "" },
+      { key: "b", value: "", translatedValue: "" },
+      { key: "c", value: "", translatedValue: "" },
+      { key: "d", value: "", translatedValue: "" },
     ]);
   };
 
@@ -78,7 +85,9 @@ const AddQuestion = ({
 
     if (splitOptions.length === 4) {
       e.preventDefault();
-      setOptions(splitOptions.map((value: string, index: number) => ({ key: options[index].key, value })));
+      setOptions(
+        splitOptions.map((value: string, index: number) => ({ key: options[index].key, value, translatedValue: "" }))
+      );
     }
   };
 
@@ -93,17 +102,44 @@ const AddQuestion = ({
     if (splitOptions.length === 5) {
       e.preventDefault();
       setTitle(splitOptions[0]);
-      setOptions(splitOptions.slice(1, 5).map((value: string, index: number) => ({ key: options[index].key, value })));
+      setOptions(
+        splitOptions
+          .slice(1, 5)
+          .map((value: string, index: number) => ({ key: options[index].key, value, translatedValue: "" }))
+      );
+    }
+  };
+
+  const handleTranslate = async () => {
+    if (translate.source && translate.target) {
+      setTranslateLoading(true);
+      try {
+        if (title) setTranslatedTitle(await translateTextApi(title, data?.sourceLanguage!, data?.targetLanguage!));
+        const translatedOptions = options.map(async (option) => {
+          if (option.value)
+            return {
+              ...option,
+              translatedValue: await translateTextApi(option.value, data?.sourceLanguage!, data?.targetLanguage!),
+            };
+          return option;
+        });
+        setOptions(await Promise.all(translatedOptions));
+      } catch (err: any) {
+        error("Translation failed");
+      } finally {
+        setTranslateLoading(false);
+      }
     }
   };
 
   const handleClear = () => {
     setTitle("");
+    setTranslatedTitle("");
     setOptions([
-      { key: "a", value: "" },
-      { key: "b", value: "" },
-      { key: "c", value: "" },
-      { key: "d", value: "" },
+      { key: "a", value: "", translatedValue: "" },
+      { key: "b", value: "", translatedValue: "" },
+      { key: "c", value: "", translatedValue: "" },
+      { key: "d", value: "", translatedValue: "" },
     ]);
     setAnswer("");
   };
@@ -129,25 +165,59 @@ const AddQuestion = ({
             onPaste={handleTextAreaPaste}
             className="w-full font-medium"
           />
+          {translatedTitle && (
+            <Input
+              id="question"
+              placeholder="question"
+              value={translatedTitle}
+              onChange={(e) => setTranslatedTitle(e.target.value)}
+              className="w-full h-7 border-none shadow-none focus-visible:ring-gray-300"
+            />
+          )}
         </div>
         <div className="grid items-center gap-1.5">
-          <Label htmlFor="question">Options</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="question">Options</Label>
+            {translate.enable && (
+              <Button variant={"outline"} size={"sm"} onClick={handleTranslate}>
+                {translateLoading ? <ReloadIcon className="w-3 h-3 animate-spin mr-2" /> : ""} Translate
+              </Button>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-2">
             {options.map((o, i) => (
-              <div key={i} className="flex items-center gap-1">
-                <Label htmlFor="option1">({o.key})</Label>
-                <Input
-                  id="option1"
-                  placeholder={`option ${i + 1} ${i === 0 ? "|| Paste 4 options" : ""}`}
-                  value={o.value}
-                  onChange={(e) => {
-                    const newOptions = [...options];
-                    newOptions[i].value = e.target.value;
-                    setOptions(newOptions);
-                  }}
-                  onPaste={i === 0 ? handleOptionsPaste : undefined}
-                  className="w-full"
-                />
+              <div key={i} className="flex gap-1">
+                <Label htmlFor="option1" className="mt-2.5">
+                  ({o.key})
+                </Label>
+                <div className="flex flex-col gap-1">
+                  <Input
+                    id="option1"
+                    placeholder={`option ${i + 1} ${i === 0 ? "|| Paste 4 options" : ""}`}
+                    value={o.value}
+                    onChange={(e) => {
+                      const newOptions = [...options];
+                      newOptions[i].value = e.target.value;
+                      setOptions(newOptions);
+                    }}
+                    onPaste={i === 0 ? handleOptionsPaste : undefined}
+                    className="w-full"
+                  />
+                  {o.translatedValue && (
+                    <Input
+                      id="option1"
+                      placeholder={`option ${i + 1} ${i === 0 ? "|| Paste 4 options" : ""}`}
+                      value={o.translatedValue}
+                      onChange={(e) => {
+                        const newOptions = [...options];
+                        newOptions[i].translatedValue = e.target.value;
+                        setOptions(newOptions);
+                      }}
+                      onPaste={i === 0 ? handleOptionsPaste : undefined}
+                      className="w-full h-7 border-none shadow-none focus-visible:ring-gray-300"
+                    />
+                  )}
+                </div>
               </div>
             ))}
           </div>

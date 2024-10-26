@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     const quiz = await prisma.quiz.findUnique({
       where: { id },
       include: {
-        questions: { select: { answer: false, id: true, title: true, quizId: true, options: true } },
+        questions: { select: { answer: false, id: true, title: true, translatedTitle: true, quizId: true, options: true } },
         images: true,
       },
     });

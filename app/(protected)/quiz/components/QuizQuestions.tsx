@@ -15,7 +15,7 @@ const QuizQuestions = ({
   editable?: boolean;
 }) => {
   return (
-    <div className="grid grid-cols-1 xs:grid-cols-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2">
       {questions.map((question, index) => (
         <div
           key={question.id}
@@ -28,17 +28,23 @@ const QuizQuestions = ({
               <EditQuestion question={question} data={data} setData={setData} />
             </div>
           )}
-          <div className="flex gap-2 text-sm font-medium">
+          <div className="flex gap-2 text-base font-medium">
             <span>{index + 1}.</span>
-            <p>{question.title}</p>
+            <div>
+              <p>{question.title}</p>
+              <p className="text-xs">{question.translatedTitle}</p>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-1">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-1">
             {question.options
               .sort((a, b) => a.key.localeCompare(b.key))
               .map((option, index) => (
-                <div key={option.id} className="flex gap-2 text-xs">
+                <div key={option.id} className="flex gap-2 text-sm">
                   <span>({option.key})</span>
-                  <p>{option.value}</p>
+                  <div className="mt-[2px]">
+                    <p className="leading-4">{option.value}</p>
+                    <p className="text-xs leading-[18px] mt-1">{option.translatedValue}</p>
+                  </div>
                 </div>
               ))}
           </div>

@@ -31,24 +31,27 @@ const QuizQuestions = ({
     });
   }, []);
   return (
-    <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 px-1">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-1">
       {questions.map((question, index) => (
-        <div key={question.id} className={`flex flex-col gap-1 group relative rounded`}>
-          <div className="flex gap-2 text-sm font-semibold">
+        <div key={question.id} className={`flex flex-col gap-2 group relative rounded`}>
+          <div className="flex gap-2 text-base ">
             <span>{index + 1}.</span>
-            <p>{question.title}</p>
+            <div>
+              <p className="font-semibold">{question.title}</p>
+              <p className="text-[13px] leading-5">{question.translatedTitle}</p>
+            </div>
           </div>
 
           <RadioGroup
             value={answers.find((answer) => answer.questionId === question.id)?.answer}
-            className="grid grid-cols-2 gap-2"
+            className="grid grid-cols-1 xs:grid-cols-2 gap-0"
           >
             {question.options
               .sort((a, b) => a.key.localeCompare(b.key))
               .map((option, index) => (
                 <Label
                   key={`${question.id}-${option.key}`}
-                  className="flex items-start gap-1.5 text-sm quiz cursor-pointer w-full"
+                  className="flex items-start gap-1.5 text-sm quiz cursor-pointer w-full p-2 hover:bg-gray-100 rounded-lg"
                   onClick={(e) => {
                     e.stopPropagation();
                     clickHandler(question.id, option.key);
@@ -59,12 +62,17 @@ const QuizQuestions = ({
                     checked={answers.find((answer) => answer.questionId === question.id)?.answer === option.key}
                     value={option.key}
                     id={`${question.id}-${option.key}`}
-                    className="h-4 w-4 mt-[0.5px]"
+                    className="h-4 w-4 mt-0.5"
                   />
-                  <span className="-mt-0.5">({option.key})</span>
-                  <Label className="mt-[1px]" htmlFor={option.key}>
-                    {option.value}
-                  </Label>
+                  <span className="">({option.key})</span>
+                  <div className="">
+                    <Label htmlFor={option.key}>
+                      <p className="leading-4">{option.value}</p>
+                    </Label>
+                    <Label htmlFor={option.key}>
+                      <p className="text-[13px] leading-5 mt-[2px]">{option.translatedValue}</p>
+                    </Label>
+                  </div>
                 </Label>
               ))}
           </RadioGroup>

@@ -15,6 +15,7 @@ import { useSession } from "next-auth/react";
 import { IQuiz } from "@/types";
 import ImageUplaod from "@/app/(protected)/quiz/components/ImageUplaod";
 import AddQuizInput from "@/app/(protected)/quiz/components/AddQuizInput";
+import Translation from "../components/Translation";
 
 const Page = ({ searchParams }: { searchParams: { group: string } }) => {
   const router = useRouter();
@@ -28,6 +29,12 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
   const [quizName, setQuizName] = React.useState("");
   const [inputs, setInputs] = React.useState<string[]>([]);
   const [formStatus, setFormStatus] = React.useState("");
+
+  const [translation, setTranslation] = React.useState({
+    enable: false,
+    sourceLanguage: "",
+    targetLanguage: "",
+  });
 
   const uploadImage = async (file: File, key: string) => {
     const res = await uploadImageAPI(file);
@@ -69,6 +76,7 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
       groupId: group?.id!,
       userInputs: inputs,
       images: uploadedImages,
+      translation,
     });
     if (!res.ok) {
       error(res.error!, 1000);
@@ -145,6 +153,8 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
 
           <Separator />
 
+          <Translation setTranslation={setTranslation} />
+
           <Label>Quiz Footer</Label>
           <div className="grid grid-cols-1 gap-2">
             <Input
@@ -165,7 +175,15 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
           </div>
 
           <div className="grid grid-cols-1 gap-2 place-items-end">
-            <Button type="submit" className="w-fit">
+            <Button
+              type="submit"
+              className="w-fit"
+              disabled={
+                formStatus
+                  ? true
+                  : false || (translation.enable ? !translation.sourceLanguage || !translation.targetLanguage : false)
+              }
+            >
               {formStatus ? formStatus : "Create"}
             </Button>
           </div>
