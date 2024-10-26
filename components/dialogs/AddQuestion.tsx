@@ -66,17 +66,46 @@ const AddQuestion = ({
     ]);
   };
 
-  const handlePaste = (e: any) => {
+  const handleOptionsPaste = (e: any) => {
     const pastedData = e.clipboardData.getData("text");
     const splitOptions = pastedData
       .split("\n")
-      .map((s: string) => s.trim())
+      .map((s: string) => {
+        // Remove any leading "a)", "b)", ..., "(1)", "(2)", etc.
+        return s.replace(/^(?:[a-d1-4]\)|\([a-d1-4]\))\s*/, "").trim();
+      })
       .filter((s: string) => s !== "");
 
     if (splitOptions.length === 4) {
       e.preventDefault();
       setOptions(splitOptions.map((value: string, index: number) => ({ key: options[index].key, value })));
     }
+  };
+
+  const handleTextAreaPaste = (e: any) => {
+    const pastedData = e.clipboardData.getData("text");
+    const splitOptions = pastedData
+      .split("\n")
+      // Remove any leading "a)", "b)", ..., "(1)", "(2)", etc.
+      .map((s: string) => s.replace(/^(?:[a-d1-4]\)|\([a-d1-4]\))\s*/, "").trim())
+      .filter((s: string) => s !== "");
+
+    if (splitOptions.length === 5) {
+      e.preventDefault();
+      setTitle(splitOptions[0]);
+      setOptions(splitOptions.slice(1, 5).map((value: string, index: number) => ({ key: options[index].key, value })));
+    }
+  };
+
+  const handleClear = () => {
+    setTitle("");
+    setOptions([
+      { key: "a", value: "" },
+      { key: "b", value: "" },
+      { key: "c", value: "" },
+      { key: "d", value: "" },
+    ]);
+    setAnswer("");
   };
 
   return (
@@ -97,6 +126,7 @@ const AddQuestion = ({
             rows={2}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            onPaste={handleTextAreaPaste}
             className="w-full font-medium"
           />
         </div>
@@ -115,7 +145,7 @@ const AddQuestion = ({
                     newOptions[i].value = e.target.value;
                     setOptions(newOptions);
                   }}
-                  onPaste={i === 0 ? handlePaste : undefined}
+                  onPaste={i === 0 ? handleOptionsPaste : undefined}
                   className="w-full"
                 />
               </div>
@@ -124,7 +154,7 @@ const AddQuestion = ({
         </div>
         <div className="grid items-center gap-1.5">
           <Label htmlFor="answer">Correct Answer</Label>
-          <RadioGroup onValueChange={setAnswer} className="flex">
+          <RadioGroup value={answer} onValueChange={setAnswer} className="flex">
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="a" id="a" />
               <Label htmlFor="a">(a)</Label>
@@ -143,8 +173,15 @@ const AddQuestion = ({
             </div>
           </RadioGroup>
         </div>
-        <div className="grid items-center gap-1.5 mt-5">
-          <Button variant={"outline"} onClick={handleSubmit} disabled={loading}>
+        <div className="flex gap-2 mt-5">
+          <Button
+            variant={"destructive"}
+            onClick={handleClear}
+            disabled={!(Boolean(title) || Boolean(answer) || options.some((o) => Boolean(o.value)))}
+          >
+            Clear All
+          </Button>
+          <Button variant={"default"} onClick={handleSubmit} disabled={loading} className="w-full">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add Question"}
           </Button>
         </div>
