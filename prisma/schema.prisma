@@ -144,12 +144,12 @@ model Quiz {
 }
 
 model Question {
-  id              String @id @default(auto()) @map("_id") @db.ObjectId
+  id              String  @id @default(auto()) @map("_id") @db.ObjectId
   title           String
-  translatedTitle String
+  translatedTitle String?
   answer          String
-  quizId          String @db.ObjectId
-  quiz            Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  quizId          String  @db.ObjectId
+  quiz            Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   options                Option[]
   participantQuizAnswers ParticipantQuizAnswer[]
@@ -162,7 +162,7 @@ model Option {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   key             String
   value           String
-  translatedValue String
+  translatedValue String?
   questionId      String   @db.ObjectId
   question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 

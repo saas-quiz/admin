@@ -126,8 +126,7 @@ export const getQuizParticipantsDB = async ({ quizId }: { quizId: string }) => {
       where: { quizId },
       include: {
         User: { select: { name: true, email: true, phone: true } },
-        Quiz: { select: { title: true, questions: { select: { id: true, answer: true } } } },
-        Answers: true,
+        Answers: { include: { Question: { select: { answer: true } } } },
         QuizInputs: true,
       },
     });

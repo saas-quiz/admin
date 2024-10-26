@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { error } from "@/lib/utils";
-import { IQuiz, IQuizParticipant } from "@/types";
+import { IOption, IQuestion, IQuiz, IQuizParticipant } from "@/types";
 import { getQuizDB } from "@/lib/actions/quiz.actions";
 import { Button } from "@/components/ui/button";
 import { Pencil1Icon } from "@radix-ui/react-icons";
@@ -23,6 +23,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import Loading from "@/components/shared/Loading";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { ArrowDown, ArrowDownNarrowWide, ArrowUp, CheckCircle, XCircle } from "lucide-react";
 
 const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -104,13 +105,13 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
         </div>
       </TabsContent>
       <TabsContent value="participants">
-        <QuizParticipants quizId={searchParams.id} />
+        <QuizParticipants quizId={searchParams.id} questions={data.questions} />
       </TabsContent>
     </Tabs>
   );
 };
 
-const QuizParticipants = ({ quizId }: { quizId: string }) => {
+const QuizParticipants = ({ quizId, questions }: { quizId: string; questions: IQuestion[] }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [participants, setParticipants] = useState<IQuizParticipant[]>([]);
 
@@ -146,6 +147,8 @@ const QuizParticipants = ({ quizId }: { quizId: string }) => {
   //   setParticipants(updatedParticipants);
   // };
 
+  console.log(participants);
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -179,6 +182,7 @@ const QuizParticipants = ({ quizId }: { quizId: string }) => {
           <Participant
             key={participant.id}
             data={participant}
+            questions={questions}
             index={index}
             // rank={participants.findIndex((p) => p.id === participant.id)}
             // totalParticipants={participants.length}
@@ -191,17 +195,31 @@ const QuizParticipants = ({ quizId }: { quizId: string }) => {
 
 const Participant = ({
   data,
+  questions,
   index,
 }: // rank,
 // totalParticipants,
 {
   data: IQuizParticipant;
+  questions: IQuestion[];
   index: number;
   // rank: number;
   // totalParticipants: number;
 }) => {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
+  const [showResult, setShowResult] = useState(false);
+  const [results, setResults] = useState<
+    {
+      id: string;
+      title: string;
+      options: IOption[];
+      correctAnswer: string;
+      userAnswer: string | null;
+      isAttempted: boolean;
+      isCorrect: boolean;
+    }[]
+  >([]);
   // const [percentile, setPercentile] = useState(0);
 
   // useEffect(() => {
@@ -212,23 +230,39 @@ const Participant = ({
 
   // count correct and incorrect answers
   useEffect(() => {
-    if (!data?.Quiz?.questions || !data.Answers) return;
+    if (!data.Answers) return;
 
-    const answerMap = new Map(data.Answers.map((answer) => [answer.questionId, answer.answer]));
     let correct = 0;
     let incorrect = 0;
-
-    data.Quiz.questions.forEach((question) => {
-      const userAnswer = answerMap.get(question.id);
-      if (userAnswer === question.answer) {
+    data.Answers.forEach((answer) => {
+      if (answer.Question?.answer === answer.answer) {
         correct++;
       } else {
         incorrect++;
       }
     });
-
     setCorrectAnswers(correct);
     setIncorrectAnswers(incorrect);
+
+    // Create a lookup object to store answers by questionId
+    const answerLookup = data.Answers.reduce((acc: { [key: string]: string }, answer) => {
+      acc[answer.questionId] = answer.answer;
+      return acc;
+    }, {});
+
+    const res = questions.map((q) => {
+      const userAnswer = answerLookup[q.id] || null;
+      return {
+        id: q.id,
+        title: q.title,
+        options: q.options,
+        correctAnswer: q.answer,
+        userAnswer,
+        isAttempted: !!userAnswer,
+        isCorrect: q.answer === userAnswer,
+      };
+    });
+    setResults(res);
   }, [data]);
 
   return (
@@ -254,7 +288,7 @@ const Participant = ({
             <span className="font-medium">Question Answered:</span> {data.Answers.length}
           </p>
           <p className="text-sm">
-            <span className="font-medium">Not Answered:</span> {data.Quiz.questions.length - data.Answers.length}
+            <span className="font-medium">Not Answered:</span> {questions.length - data.Answers.length}
           </p>
           <p className="text-sm">
             <span className="font-medium">Correct Answers:</span> {correctAnswers}
@@ -266,6 +300,48 @@ const Participant = ({
           <p className="text-sm">
             <span className="font-medium">Submitted on:</span> {data.createdAt.toLocaleString()}
           </p>
+        </div>
+
+        <div className="mt-2">
+          <Button variant={"secondary"} size={"sm"} onClick={() => setShowResult(!showResult)}>
+            {showResult ? <ArrowUp className="h-3 w-3 mr-2" /> : <ArrowDown className="h-3 w-3 mr-2" />}{" "}
+            {showResult ? "Hide Result" : "Show Result"}
+          </Button>
+
+          <div className={`${showResult ? "block" : "hidden"} max-h-[300px] overflow-y-scroll mt-3`}>
+            {results.map((res, index) => (
+              <div
+                key={res.id}
+                className={`flex flex-col m-1 p-2 rounded-md ${
+                  res.isCorrect && res.isAttempted ? "bg-green-50" : res.isAttempted ? "bg-red-50" : "bg-gray-50"
+                }`}
+              >
+                <div className="flex gap-2 text-base font-medium">
+                  <span>{index + 1}.</span>
+                  <div>
+                    <p>{res.title}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-1">
+                  {res.options
+                    .sort((a, b) => a.key.localeCompare(b.key))
+                    .map((option, index) => (
+                      <div key={option.id} className="flex items-start gap-2 text-sm">
+                        <div>({option.key})</div>
+                        {res.correctAnswer === option.key && <CheckCircle className="h-4 w-4 text-green-600 mt-[3px]" />}
+                        {res.userAnswer !== res.correctAnswer && res.userAnswer === option.key && (
+                          <XCircle className="h-4 w-4 text-red-500  mt-[3px]" />
+                        )}
+                        <div className="mt-[2px]">
+                          <p className="leading-4">{option.value}</p>
+                          <p className="text-xs leading-[18px] mt-1">{option.translatedValue}</p>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </AccordionContent>
     </AccordionItem>
