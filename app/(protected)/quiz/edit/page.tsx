@@ -14,6 +14,8 @@ import { updateQuizDB } from "@/lib/actions/quiz.actions";
 import { IQuiz } from "@/types";
 import { getQuizDB } from "@/lib/actions/quiz.actions";
 import Loading from "@/components/shared/Loading";
+import StrictMode from "../components/StrictMode";
+import Translation from "../components/Translation";
 
 const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   const router = useRouter();
@@ -28,6 +30,13 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   const [inputs, setInputs] = React.useState<string[]>(data?.userInputs || []);
   const [formStatus, setFormStatus] = React.useState("");
 
+  const [isStrictMode, setIsStrictMode] = React.useState(false);
+  const [translation, setTranslation] = React.useState({
+    enable: false,
+    sourceLanguage: "",
+    targetLanguage: "",
+  });
+
   useEffect(() => {
     const fetchData = async () => {
       if (searchParams.id) {
@@ -39,6 +48,12 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
         setQuizName(res.data?.title || "");
         setInputs(res.data?.userInputs || []);
         setImages(res.data?.images || []);
+        setIsStrictMode(res.data?.isStrictMode || false);
+        setTranslation({
+          enable: res.data?.translationEnabled || false,
+          sourceLanguage: res.data?.sourceLanguage || "",
+          targetLanguage: res.data?.targetLanguage || "",
+        });
       }
     };
     fetchData();
@@ -100,6 +115,8 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
       quizId: data.id!,
       userInputs: inputs,
       images: uploadedImages,
+      isStrictMode,
+      translation,
     });
     if (!res.ok) {
       error(res.error!, 1000);
@@ -154,6 +171,9 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
           </div>
 
           <Separator />
+
+          <StrictMode isStrictMode={isStrictMode} setIsStrictMode={setIsStrictMode} />
+          <Translation translation={translation} setTranslation={setTranslation} />
 
           <Label>Quiz Footer</Label>
           <div className="grid grid-cols-1 gap-2">

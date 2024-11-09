@@ -51,12 +51,14 @@ export const createQuizDB = async (
     groupId,
     userInputs,
     images,
+    isStrictMode,
     translation,
   }: {
     author: string;
     groupId: string;
     userInputs: string[];
     images: IImage[];
+    isStrictMode: boolean;
     translation: { enable: boolean; sourceLanguage: string; targetLanguage: string };
   }
 ) => {
@@ -76,6 +78,7 @@ export const createQuizDB = async (
           footerLink: values.footerLink as string,
           author: author,
           groupId: groupId,
+          isStrictMode: isStrictMode,
           translationEnabled: translation.enable,
           sourceLanguage: translation.sourceLanguage,
           targetLanguage: translation.targetLanguage,
@@ -112,7 +115,19 @@ export const createQuizDB = async (
 
 export const updateQuizDB = async (
   values: { [k: string]: FormDataEntryValue },
-  { quizId, userInputs, images }: { quizId: string; userInputs: string[]; images: IImage[] }
+  {
+    quizId,
+    userInputs,
+    images,
+    isStrictMode,
+    translation,
+  }: {
+    quizId: string;
+    userInputs: string[];
+    images: IImage[];
+    isStrictMode: boolean;
+    translation: { enable: boolean; sourceLanguage: string; targetLanguage: string };
+  }
 ) => {
   try {
     const res = await prisma.$transaction(async (pm) => {
@@ -124,6 +139,10 @@ export const updateQuizDB = async (
           userInputs: userInputs,
           duration: parseInt(values.duration as string) || 0,
           maxMarks: parseInt(values.maxMarks as string) || 0,
+          isStrictMode: isStrictMode,
+          translationEnabled: translation.enable,
+          sourceLanguage: translation.sourceLanguage,
+          targetLanguage: translation.targetLanguage,
           footerHeading1: values.footerHeading1 as string,
           footerHeading2: values.footerHeading2 as string,
           footerText1: values.footerText1 as string,

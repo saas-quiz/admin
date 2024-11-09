@@ -118,6 +118,7 @@ model Quiz {
   maxMarks   Int?
   userInputs String[]
 
+  isStrictMode       Boolean @default(false)
   translationEnabled Boolean @default(false)
   sourceLanguage     String?
   targetLanguage     String?

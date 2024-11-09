@@ -64,7 +64,10 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
       <TabsContent value="details">
         <div className="w-full mx-auto max-w-6xl flex flex-col gap-5">
           <div className="flex items-center justify-between bg-muted rounded-lg px-2 shadow-md">
-            <h1 className="md:text-xl font-semibold tracking-tight line-clamp-2">{data.title}</h1>
+            <h1 className="md:text-xl font-semibold tracking-tight line-clamp-2">
+              {data.title}
+              {data.isStrictMode && <span className="text-red-600 ml-2 text-sm">(Strict Mode)</span>}
+            </h1>
             <div className="flex gap-1">
               <Button variant={"ghost"} size={"icon"} className="text-blue-600 hover:bg-blue-100 hover:text-blue-600">
                 <Link href={`/quiz/edit?id=${data.id}`}>

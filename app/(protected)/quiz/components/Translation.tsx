@@ -4,8 +4,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import React, { useEffect } from "react";
 
 const Translation = ({
+  translation,
   setTranslation,
 }: {
+  translation: { enable: boolean; sourceLanguage: string; targetLanguage: string };
   setTranslation: React.Dispatch<
     React.SetStateAction<{
       enable: boolean;
@@ -14,11 +16,8 @@ const Translation = ({
     }>
   >;
 }) => {
-  const [enable, setEnable] = React.useState(false);
-
+  const [enable, setEnable] = React.useState(translation.enable || false);
   const [languagesData, setLanguagesData] = React.useState<{ code: string; name: string; targets: string[] }[]>([]);
-  const [sourceLanguage, setSourceLanguage] = React.useState<{ code: string; name: string }>();
-  const [targetLanguage, setTargetLanguage] = React.useState<{ code: string; name: string }>();
 
   useEffect(() => {
     const getData = async () => {
@@ -31,12 +30,6 @@ const Translation = ({
     };
     getData();
   }, []);
-
-  useEffect(() => {
-    if (sourceLanguage && targetLanguage) {
-      setTranslation((prev) => ({ ...prev, sourceLanguage: sourceLanguage.code, targetLanguage: targetLanguage.code }));
-    }
-  }, [sourceLanguage, targetLanguage]);
 
   return (
     <div className="flex flex-col">
@@ -51,10 +44,13 @@ const Translation = ({
         />
         <Label htmlFor="translation">Enable Translation</Label>
       </div>
-      <p className="text-xs text-muted-foreground">Enable translation for your quiz</p>
+      <p className="text-sm text-muted-foreground">Enable translation for your quiz</p>
 
       <div className={`flex items-center space-x-2 mt-2 h-0 overflow-hidden ${enable ? "h-auto" : ""} `}>
-        <Select onValueChange={(value) => setSourceLanguage(languagesData.find((language) => language.code === value))}>
+        <Select
+          defaultValue={translation.sourceLanguage}
+          onValueChange={(value) => setTranslation((prev) => ({ ...prev, sourceLanguage: value }))}
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Source Language" />
           </SelectTrigger>
@@ -68,8 +64,9 @@ const Translation = ({
         </Select>
 
         <Select
-          disabled={!sourceLanguage}
-          onValueChange={(value) => setTargetLanguage(languagesData.find((language) => language.code === value))}
+          // disabled={Boolean(translation.targetLanguage)}
+          defaultValue={translation.targetLanguage}
+          onValueChange={(value) => setTranslation((prev) => ({ ...prev, targetLanguage: value }))}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Target Language" />

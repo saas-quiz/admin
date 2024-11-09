@@ -16,6 +16,7 @@ import { IQuiz } from "@/types";
 import ImageUplaod from "@/app/(protected)/quiz/components/ImageUplaod";
 import AddQuizInput from "@/app/(protected)/quiz/components/AddQuizInput";
 import Translation from "../components/Translation";
+import StrictMode from "../components/StrictMode";
 
 const Page = ({ searchParams }: { searchParams: { group: string } }) => {
   const router = useRouter();
@@ -30,6 +31,7 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
   const [inputs, setInputs] = React.useState<string[]>([]);
   const [formStatus, setFormStatus] = React.useState("");
 
+  const [isStrictMode, setIsStrictMode] = React.useState(false);
   const [translation, setTranslation] = React.useState({
     enable: false,
     sourceLanguage: "",
@@ -76,6 +78,7 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
       groupId: group?.id!,
       userInputs: inputs,
       images: uploadedImages,
+      isStrictMode,
       translation,
     });
     if (!res.ok) {
@@ -153,7 +156,8 @@ const Page = ({ searchParams }: { searchParams: { group: string } }) => {
 
           <Separator />
 
-          <Translation setTranslation={setTranslation} />
+          <StrictMode isStrictMode={isStrictMode} setIsStrictMode={setIsStrictMode} />
+          <Translation translation={translation} setTranslation={setTranslation} />
 
           <Label>Quiz Footer</Label>
           <div className="grid grid-cols-1 gap-2">

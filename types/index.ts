@@ -30,6 +30,7 @@ export interface IQuiz {
   groupId: string;
   published: boolean;
 
+  isStrictMode: boolean;
   translationEnabled: boolean;
   sourceLanguage?: string;
   targetLanguage?: string;
