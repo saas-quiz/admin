@@ -178,11 +178,6 @@ const AddQuestion = ({
         <div className="grid items-center gap-1.5">
           <div className="flex items-center justify-between">
             <Label htmlFor="question">Options</Label>
-            {translate.enable && (
-              <Button variant={"outline"} size={"sm"} onClick={handleTranslate}>
-                {translateLoading ? <ReloadIcon className="w-3 h-3 animate-spin mr-2" /> : ""} Translate
-              </Button>
-            )}
           </div>
           <div className="grid grid-cols-2 gap-2">
             {options.map((o, i) => (
@@ -251,7 +246,21 @@ const AddQuestion = ({
           >
             Clear All
           </Button>
-          <Button variant={"default"} onClick={handleSubmit} disabled={loading} className="w-full">
+          <Button variant={"default"} onClick={handleTranslate} disabled={!Boolean(title) || options.some((o) => !o.value)}>
+            {translateLoading ? <ReloadIcon className="w-3 h-3 animate-spin mr-2" /> : ""} Translate
+          </Button>
+          <Button
+            variant={"default"}
+            onClick={handleSubmit}
+            disabled={
+              loading ||
+              !Boolean(title) ||
+              options.some((o) => !o.value) ||
+              !Boolean(translatedTitle) ||
+              options.some((o) => !o.translatedValue)
+            }
+            className="w-full"
+          >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add Question"}
           </Button>
         </div>

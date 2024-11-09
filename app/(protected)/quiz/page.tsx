@@ -90,7 +90,7 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
             setData={setData}
             translate={{ enable: data.translationEnabled, source: data.sourceLanguage, target: data.targetLanguage }}
           />
-          <QuizQuestions questions={data.questions} data={data} setData={setData} editable />
+          <QuizQuestions questions={data.questions} data={data} setData={setData} />
 
           <QuizFooter
             data={{

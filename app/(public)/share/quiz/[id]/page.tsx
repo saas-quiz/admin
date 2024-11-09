@@ -31,73 +31,73 @@ const Page = ({ params }: { params: { id: string } }) => {
   const [isAgreementChecked, setIsAgreementChecked] = React.useState(false);
 
   // monitor when the user switches away from the window or exits full-screen mode
-  useEffect(() => {
-    if (typeof document === "undefined") return;
+  // useEffect(() => {
+  //   if (typeof document === "undefined") return;
 
-    const disqualifyUser = async (reason: string) => {
-      await submitParticipantQuizDB({
-        userId: user?.id!,
-        quizId: data?.quiz?.id,
-        groupId: data?.quiz?.groupId,
-        answers,
-        quizInputs,
-        isQualified: false,
-        reason,
-      });
-    };
+  //   const disqualifyUser = async (reason: string) => {
+  //     await submitParticipantQuizDB({
+  //       userId: user?.id!,
+  //       quizId: data?.quiz?.id,
+  //       groupId: data?.quiz?.groupId,
+  //       answers,
+  //       quizInputs,
+  //       isQualified: false,
+  //       reason,
+  //     });
+  //   };
 
-    const checkFullScreen = async () => {
-      const isFull = !!document.fullscreenElement;
-      if (!isFull) {
-        if (user) {
-          disqualifyUser("You have exited full-screen mode!");
+  //   const checkFullScreen = async () => {
+  //     const isFull = !!document.fullscreenElement;
+  //     if (!isFull) {
+  //       if (user) {
+  //         disqualifyUser("You have exited full-screen mode!");
 
-          // Remove event listeners
-          window.removeEventListener("blur", handleWindowBlur);
-          alert("You have exited full-screen mode! You are disqualified!");
-          router.replace("/share/quiz/disqualified?exitFullScreen=true");
-        }
-      }
-    };
+  //         // Remove event listeners
+  //         window.removeEventListener("blur", handleWindowBlur);
+  //         alert("You have exited full-screen mode! You are disqualified!");
+  //         router.replace("/share/quiz/disqualified?exitFullScreen=true");
+  //       }
+  //     }
+  //   };
 
-    // Handle when the user switches away from the window
-    const handleWindowBlur = async () => {
-      if (user) {
-        disqualifyUser("You switched away from the quiz! Possible reason: Tried to switch tabs or minimize the browser.");
+  //   // Handle when the user switches away from the window
+  //   const handleWindowBlur = async () => {
+  //     if (user) {
+  //       disqualifyUser("You switched away from the quiz! Possible reason: Tried to switch tabs or minimize the browser.");
 
-        // Remove event listeners
-        document.removeEventListener("fullscreenchange", checkFullScreen);
-        document.removeEventListener("mozfullscreenchange", checkFullScreen);
-        document.removeEventListener("webkitfullscreenchange", checkFullScreen);
-        document.removeEventListener("msfullscreenchange", checkFullScreen);
-        //
+  //       // Remove event listeners
+  //       document.removeEventListener("fullscreenchange", checkFullScreen);
+  //       document.removeEventListener("mozfullscreenchange", checkFullScreen);
+  //       document.removeEventListener("webkitfullscreenchange", checkFullScreen);
+  //       document.removeEventListener("msfullscreenchange", checkFullScreen);
+  //       //
 
-        alert("You switched away from the quiz! You are disqualified!");
-        router.replace("/share/quiz/disqualified?&lostFocus=true");
-      }
-    };
+  //       alert("You switched away from the quiz! You are disqualified!");
+  //       router.replace("/share/quiz/disqualified?&lostFocus=true");
+  //     }
+  //   };
 
-    // Event listeners for entering/exiting full-screen
-    document.addEventListener("fullscreenchange", checkFullScreen);
-    document.addEventListener("mozfullscreenchange", checkFullScreen); // Firefox
-    document.addEventListener("webkitfullscreenchange", checkFullScreen); // Safari
-    document.addEventListener("msfullscreenchange", checkFullScreen); // IE/Edge
+  //   // Event listeners for entering/exiting full-screen
+  //   document.addEventListener("fullscreenchange", checkFullScreen);
+  //   document.addEventListener("mozfullscreenchange", checkFullScreen); // Firefox
+  //   document.addEventListener("webkitfullscreenchange", checkFullScreen); // Safari
+  //   document.addEventListener("msfullscreenchange", checkFullScreen); // IE/Edge
 
-    // window.addEventListener("focus", handleWindowBlur); // when window gains focus
-    window.addEventListener("blur", handleWindowBlur); // when window loses focus
-    // document.addEventListener("visibilitychange", () => {});
+  //   // window.addEventListener("focus", handleWindowBlur); // when window gains focus
+  //   window.addEventListener("blur", handleWindowBlur); // when window loses focus
+  //   // document.addEventListener("visibilitychange", () => {});
 
-    return () => {
-      document.removeEventListener("fullscreenchange", checkFullScreen);
-      document.removeEventListener("mozfullscreenchange", checkFullScreen);
-      document.removeEventListener("webkitfullscreenchange", checkFullScreen);
-      document.removeEventListener("msfullscreenchange", checkFullScreen);
+  //   return () => {
+  //     document.removeEventListener("fullscreenchange", checkFullScreen);
+  //     document.removeEventListener("mozfullscreenchange", checkFullScreen);
+  //     document.removeEventListener("webkitfullscreenchange", checkFullScreen);
+  //     document.removeEventListener("msfullscreenchange", checkFullScreen);
 
-      // window.removeEventListener("focus", handleWindowBlur);
-      window.removeEventListener("blur", handleWindowBlur);
-      // document.removeEventListener("visibilitychange", () => {});
-    };
-  }, [user, answers, quizInputs]);
+  //     // window.removeEventListener("focus", handleWindowBlur);
+  //     window.removeEventListener("blur", handleWindowBlur);
+  //     // document.removeEventListener("visibilitychange", () => {});
+  //   };
+  // }, [user, answers, quizInputs]);
 
   // check if quiz is published or not, and set quiz time
   useEffect(() => {
@@ -110,25 +110,25 @@ const Page = ({ params }: { params: { id: string } }) => {
   }, [data]);
 
   // monitor time left
-  useEffect(() => {
-    if (user) {
-      if (timeLeft === 0) {
-        setOpenTimeOutDialog(true);
-        return;
-      }
+  // useEffect(() => {
+  //   if (user) {
+  //     if (timeLeft === 0) {
+  //       setOpenTimeOutDialog(true);
+  //       return;
+  //     }
 
-      // if time less then 5 min show a alert
-      if (timeLeft === 300) {
-        setOpenTimeLeftDialog(true);
-      }
+  //     // if time less then 5 min show a alert
+  //     if (timeLeft === 300) {
+  //       setOpenTimeLeftDialog(true);
+  //     }
 
-      const timerId = setInterval(() => {
-        setTimeLeft((prevTime: number) => prevTime - 1);
-      }, 1000);
+  //     const timerId = setInterval(() => {
+  //       setTimeLeft((prevTime: number) => prevTime - 1);
+  //     }, 1000);
 
-      return () => clearInterval(timerId);
-    }
-  }, [timeLeft, user]);
+  //     return () => clearInterval(timerId);
+  //   }
+  // }, [timeLeft, user]);
 
   // Convert time left in seconds to hours and minutes
   const hours = Math.floor(timeLeft / 3600);
@@ -142,6 +142,8 @@ const Page = ({ params }: { params: { id: string } }) => {
       </span>
     );
   }
+
+  console.log("rendering");
 
   if (data.quiz && data.ok) {
     return (
@@ -172,7 +174,12 @@ const Page = ({ params }: { params: { id: string } }) => {
 
             {user ? (
               <>
-                <QuizQuestions questions={data.quiz.questions} answers={answers} setAnswers={setAnswers} />
+                <QuizQuestions
+                  translationEnabled={data.quiz.translationEnabled}
+                  questions={data.quiz.questions}
+                  answers={answers}
+                  setAnswers={setAnswers}
+                />
                 <QuizSubmit
                   user={user}
                   quizInputs={quizInputs}

@@ -115,11 +115,6 @@ const EditQuestion = ({
         <div className="grid items-center gap-1.5">
           <div className="flex items-center justify-between">
             <Label htmlFor="question">Options</Label>
-            {translate.enable && (
-              <Button variant={"outline"} size={"sm"} onClick={handleTranslate}>
-                {translateLoading ? <ReloadIcon className="w-3 h-3 animate-spin mr-2" /> : ""} Translate
-              </Button>
-            )}
           </div>
           <div className="grid grid-cols-2 gap-2">
             {options.map((o, i) => (
@@ -176,8 +171,23 @@ const EditQuestion = ({
             </div>
           </RadioGroup>
         </div>
-        <div className="grid items-center gap-1.5 mt-5">
-          <Button variant={"outline"} onClick={handleSubmit} disabled={loading}>
+        <div className="flex items-center gap-1.5 mt-5">
+          {translate.enable && (
+            <Button onClick={handleTranslate} disabled={!Boolean(title) || options.some((o) => !o.value)}>
+              {translateLoading ? <ReloadIcon className="w-3 h-3 animate-spin mr-2" /> : ""} Translate
+            </Button>
+          )}
+          <Button
+            className="w-full"
+            onClick={handleSubmit}
+            disabled={
+              loading ||
+              !Boolean(title) ||
+              options.some((o) => !o.value) ||
+              !Boolean(translatedTitle) ||
+              options.some((o) => !o.translatedValue)
+            }
+          >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Update"}
           </Button>
         </div>
