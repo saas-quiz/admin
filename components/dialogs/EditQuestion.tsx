@@ -184,8 +184,7 @@ const EditQuestion = ({
               loading ||
               !Boolean(title) ||
               options.some((o) => !o.value) ||
-              !Boolean(translatedTitle) ||
-              options.some((o) => !o.translatedValue)
+              (data?.translationEnabled && (!Boolean(translatedTitle) || options.some((o) => !o.translatedValue)))
             }
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Update"}

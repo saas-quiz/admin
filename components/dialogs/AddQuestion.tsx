@@ -246,9 +246,15 @@ const AddQuestion = ({
           >
             Clear All
           </Button>
-          <Button variant={"default"} onClick={handleTranslate} disabled={!Boolean(title) || options.some((o) => !o.value)}>
-            {translateLoading ? <ReloadIcon className="w-3 h-3 animate-spin mr-2" /> : ""} Translate
-          </Button>
+          {data?.translationEnabled && (
+            <Button
+              variant={"default"}
+              onClick={handleTranslate}
+              disabled={!Boolean(title) || options.some((o) => !o.value)}
+            >
+              {translateLoading ? <ReloadIcon className="w-3 h-3 animate-spin mr-2" /> : ""} Translate
+            </Button>
+          )}
           <Button
             variant={"default"}
             onClick={handleSubmit}
@@ -256,8 +262,7 @@ const AddQuestion = ({
               loading ||
               !Boolean(title) ||
               options.some((o) => !o.value) ||
-              !Boolean(translatedTitle) ||
-              options.some((o) => !o.translatedValue)
+              (data?.translationEnabled && (!Boolean(translatedTitle) || options.some((o) => !o.translatedValue)))
             }
             className="w-full"
           >
