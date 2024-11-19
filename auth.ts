@@ -12,7 +12,7 @@ export const authOptions: NextAuthConfig = {
         httpOnly: true,
         secure: true,
         sameSite: "lax",
-        domain: ".saas-quiz.netlify.app",
+        domain: "/",
       },
     },
   },
