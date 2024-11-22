@@ -5,17 +5,6 @@ import { AdapterSession, AdapterUser } from "next-auth/adapters";
 import { handleCredentialsSignIn, handleGoogleSignIn } from "./lib/auth";
 
 export const authOptions: NextAuthConfig = {
-  cookies: {
-    sessionToken: {
-      name: `__Secure-authjs.session-token`,
-      options: {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        domain: "/",
-      },
-    },
-  },
   session: {
     strategy: "jwt",
   },
