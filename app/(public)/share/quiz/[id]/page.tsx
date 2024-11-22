@@ -164,12 +164,19 @@ const Page = ({ params }: { params: { id: string } }) => {
             ) : (
               <div>
                 <h1 className="text-xl font-medium">Quiz Rules</h1>
-                <ul className="list-disc px-4">
-                  <li>The quiz will start in full-screen mode.</li>
-                  <li>Exiting full-screen will result in disqualification.</li>
-                  <li>Switching tabs or windows will lead to disqualification.</li>
-                  <li>Ensure stable internet and avoid any interruptions to avoid being disqualified.</li>
-                </ul>
+                {data?.quiz.isStrictMode ? (
+                  <ul className="list-disc px-4">
+                    <li>The quiz will start in full-screen mode.</li>
+                    <li>Exiting full-screen will result in disqualification.</li>
+                    <li>Switching tabs or windows will lead to disqualification.</li>
+                    <li>Ensure stable internet and avoid any interruptions to avoid being disqualified.</li>
+                  </ul>
+                ) : (
+                  <ul className="list-disc px-4">
+                    <li>The quiz will start in full-screen mode.</li>
+                    <li>Ensure stable internet and avoid any interruptions.</li>
+                  </ul>
+                )}
                 <div className="flex items-center space-x-2 mt-2 mb-5">
                   <Checkbox id="terms" onClick={() => setIsAgreementChecked(!isAgreementChecked)} />
                   <label
