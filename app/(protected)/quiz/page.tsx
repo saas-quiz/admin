@@ -23,7 +23,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import Loading from "@/components/shared/Loading";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowDown, ArrowDownNarrowWide, ArrowUp, CheckCircle, XCircle } from "lucide-react";
+import { ArrowDown, ArrowUp, CalendarDays, CheckCircle, ChevronDown, XCircle } from "lucide-react";
+import { convertJsonToCsv, downloadFile } from "@/lib/download";
 
 const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -108,49 +109,15 @@ const Page = ({ searchParams }: { searchParams: { id: string } }) => {
         </div>
       </TabsContent>
       <TabsContent value="participants">
-        <QuizParticipants quizId={searchParams.id} questions={data.questions} />
+        <QuizHistory quizId={searchParams.id} questions={data.questions} />
       </TabsContent>
     </Tabs>
   );
 };
 
-const QuizParticipants = ({ quizId, questions }: { quizId: string; questions: IQuestion[] }) => {
+const QuizHistory = ({ quizId, questions }: { quizId: string; questions: IQuestion[] }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [showPercentile, setShowPercentile] = useState(false);
-  const [participants, setParticipants] = useState<IQuizParticipant[]>([]);
-
-  const generatePercentile = () => {
-    // get correct answers for each participant
-    const correctAnswers = participants.reduce((acc: { id: string; answers: number }[], participant: IQuizParticipant) => {
-      const answerMap = new Map(participant.Answers.map((answer) => [answer.questionId, answer.answer]));
-      let correct = 0;
-
-      questions.forEach((question) => {
-        const userAnswer = answerMap.get(question.id);
-        if (userAnswer === question.answer) {
-          correct++;
-        }
-      });
-
-      return [...acc, { id: participant.id, answers: correct }];
-    }, []);
-
-    // sort by correct answers
-    const sortedData = correctAnswers.sort((a, b) => b.answers - a.answers);
-
-    const updatedParticipants = sortedData.map((participant: { id: string; answers: number }, index: number) => {
-      const updatedParticipant = { ...participants.find((p) => p.id === participant.id) };
-      updatedParticipant.percentile = (((sortedData.length - (index + 1)) / participants.length) * 100).toFixed(2);
-      return updatedParticipant;
-    });
-
-    // @ts-ignore
-    setParticipants(updatedParticipants);
-  };
-
-  useEffect(() => {
-    if (showPercentile) generatePercentile();
-  }, [showPercentile]);
+  const [participants, setParticipants] = useState<{ [key: string]: IQuizParticipant[] }>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -158,29 +125,186 @@ const QuizParticipants = ({ quizId, questions }: { quizId: string; questions: IQ
       const res = await getQuizParticipantsDB({ quizId });
       setIsLoading(false);
       if (!res.ok) return error(res.error!);
-      setParticipants(res.data as IQuizParticipant[]);
+      // @ts-ignore // set participants in date order
+      const participants = res?.data?.reduce((acc: { [key: string]: IQuizParticipant[] }, participant: IQuizParticipant) => {
+        const date = new Date(participant.createdAt).toDateString();
+        return { ...acc, [date]: [...(acc[date] || []), participant] };
+      }, {});
+      // @ts-ignore
+      setParticipants(participants);
     };
     fetchData();
   }, []);
+
+  return (
+    <>
+      {participants &&
+        Object.keys(participants).map((date) => (
+          <Accordion key={date} type="single" collapsible>
+            <AccordionItem value={date}>
+              <AccordionTrigger>
+                <span className="flex items-center justify-between w-full">
+                  <span className="flex items-center gap-2">
+                    <CalendarDays className="h-4 w-4" />
+                    <span>{date}</span>
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span>{participants[date].length}</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </span>
+                </span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <QuizParticipants quizId={quizId} questions={questions} participants={participants[date]} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        ))}
+    </>
+  );
+};
+
+const QuizParticipants = ({
+  quizId,
+  questions,
+  participants,
+}: {
+  quizId: string;
+  questions: IQuestion[];
+  participants: IQuizParticipant[];
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [sortedByName, setSortedByName] = useState(false);
+  const [showPercentile, setShowPercentile] = useState(false);
+  const [showDisqualified, setShowDisqualified] = useState(true);
+  const [shortedParticipants, setShortedParticipants] = useState<IQuizParticipant[]>([]);
+
+  const generateDownloadData = () => {
+    setIsDownloading(true);
+    try {
+      const formattedData = shortedParticipants.map((data) => {
+        return {
+          name: data.User.name,
+          email: data.User.email,
+          phone: data.User.phone,
+          correctAnswers: data.Answers.reduce(
+            (acc, answer) => (answer.answer === answer.Question?.answer ? acc + 1 : acc),
+            0
+          ),
+          totalQuestions: data.Answers.length,
+        };
+      });
+
+      downloadFile({
+        data: convertJsonToCsv(formattedData),
+        fileName: "users-lists.csv",
+        fileType: "text/csv",
+      });
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+    setIsDownloading(false);
+  };
+
+  const generatePercentile = () => {
+    // get correct answers for each participant
+    const correctAnswers = shortedParticipants.reduce(
+      (acc: { id: string; answers: number }[], participant: IQuizParticipant) => {
+        const answerMap = new Map(participant.Answers.map((answer) => [answer.questionId, answer.answer]));
+        let correct = 0;
+
+        questions.forEach((question) => {
+          const userAnswer = answerMap.get(question.id);
+          if (userAnswer === question.answer) {
+            correct++;
+          }
+        });
+
+        return [...acc, { id: participant.id, answers: correct }];
+      },
+      []
+    );
+
+    // sort by correct answers
+    const sortedData = correctAnswers.sort((a, b) => b.answers - a.answers);
+
+    const updatedParticipants = sortedData.map((participant: { id: string; answers: number }, index: number) => {
+      const updatedParticipant = { ...shortedParticipants.find((p) => p.id === participant.id) };
+      updatedParticipant.percentile = (((sortedData.length - (index + 1)) / (shortedParticipants.length - 1)) * 100).toFixed(
+        2
+      );
+      return updatedParticipant;
+    });
+
+    // @ts-ignore
+    setShortedParticipants(updatedParticipants);
+  };
+
+  useEffect(() => {
+    setShortedParticipants(participants);
+  }, [participants]);
+
+  useEffect(() => {
+    if (sortedByName) {
+      const sortedData = [...shortedParticipants].sort((a, b) => a.User.name.localeCompare(b.User.name));
+      setShortedParticipants(sortedData);
+    }
+  }, [sortedByName]);
+
+  useEffect(() => {
+    if (showPercentile) {
+      setSortedByName(false);
+      generatePercentile();
+    } else {
+      setShortedParticipants(participants);
+      setSortedByName(false);
+    }
+  }, [showPercentile]);
+
+  useEffect(() => {
+    if (!showDisqualified) {
+      const updatedParticipants = shortedParticipants.filter((participant) => participant.isQualified);
+      setShortedParticipants(updatedParticipants);
+    } else {
+      setSortedByName(false);
+      setShowPercentile(false);
+      setShortedParticipants(participants);
+    }
+  }, [showDisqualified]);
   return (
     <div className="px-2">
       {isLoading && <div>Loading...</div>}
-      {!isLoading && participants.length === 0 && <div>No participants found</div>}
+      {!isLoading && participants?.length === 0 && <div>No participants found</div>}
 
       {participants.length > 0 && (
-        <div className="flex justify-between items-center">
-          <p>{participants.length} participants</p>
-          {!showPercentile && (
+        <div className="flex justify-between gap-2 items-center flex-wrap mb-5">
+          <div className="flex gap-2 items-center w-full sm:w-auto justify-between sm:justify-start">
+            <p>{shortedParticipants.length} participants</p>
+            <Button size={"sm"} disabled={isDownloading} onClick={generateDownloadData}>
+              {isDownloading ? "Downloading..." : "Download CSV"}
+            </Button>
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            <div className="flex items-center space-x-2">
+              <Switch id="airplane-mode" checked={showDisqualified} onCheckedChange={setShowDisqualified} />
+              <Label htmlFor="airplane-mode">{showDisqualified ? "Hide Disqualified" : "Show Disqualified"}</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch id="airplane-mode" checked={sortedByName} onCheckedChange={setSortedByName} />
+              <Label htmlFor="airplane-mode">Sort</Label>
+            </div>
             <div className="flex items-center space-x-2">
               <Switch id="airplane-mode" checked={showPercentile} onCheckedChange={setShowPercentile} />
-              <Label htmlFor="airplane-mode">Sort & Percentile</Label>
+              <Label htmlFor="airplane-mode">Percentile</Label>
             </div>
-          )}
+          </div>
         </div>
       )}
 
       <Accordion type="multiple">
-        {participants.map((participant, index) => (
+        {shortedParticipants.map((participant, index) => (
           <Participant key={participant.id} data={participant} questions={questions} index={index} />
         ))}
       </Accordion>
