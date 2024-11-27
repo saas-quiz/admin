@@ -105,21 +105,25 @@ export function UserRegistration({
             <Label className="font-normal" htmlFor="phone">
               Phone
             </Label>
-            <Input
-              id="phone"
-              placeholder="+91********"
-              type="phone"
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              autoCapitalize="none"
-              autoComplete="phone"
-              autoCorrect="off"
-              disabled={isLoading}
-            />
+            <span className="flex items-center border rounded-md overflow-hidden focus-within:border-primary">
+              <span className="bg-muted/90 h-full flex items-center px-2">+91</span>
+              <Input
+                id="phone"
+                type="phone"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+                autoCapitalize="none"
+                autoComplete="phone"
+                autoCorrect="off"
+                disabled={isLoading}
+                className="border-none outline-none focus-visible:ring-0 shadow-none"
+              />
+            </span>
+            {phone.length > 10 && <span className="text-red-500 text-xs">Invalid phone number</span>}
           </div>
         </div>
         <DialogFooter>
-          <Button size={"sm"} onClick={submitHandler} disabled={isLoading || !name || !email || !phone}>
+          <Button size={"sm"} onClick={submitHandler} disabled={isLoading || !name || !email || phone.length !== 10}>
             {isLoading ? <ReloadIcon className="mr-2 h-4 w-4 animate-spin" /> : "Submit"}
           </Button>
         </DialogFooter>
