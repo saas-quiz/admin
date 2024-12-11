@@ -34,6 +34,7 @@ export function QuizSubmit({
   groupId: string;
 }) {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [open, setOpen] = React.useState(false);
 
   const submitHandler = async () => {
@@ -43,6 +44,7 @@ export function QuizSubmit({
       return;
     }
 
+    setIsSubmitting(true);
     const res = await submitParticipantQuizDB({
       userId: user.id,
       quizId,
@@ -51,6 +53,7 @@ export function QuizSubmit({
       quizInputs,
       isQualified: true,
     });
+    setIsSubmitting(false);
 
     if (!res.ok) {
       if (res.redirectTo) {
@@ -71,7 +74,7 @@ export function QuizSubmit({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-fit mt-10">Submit</Button>
+        <Button className="w-fit mt-10">{isSubmitting ? "Submitting..." : "Submit Quiz"}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

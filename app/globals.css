@@ -50,7 +50,7 @@ body {
 }
 
 .quiz span[data-state="checked"] {
-  background-color: rgb(21, 21, 21);
+  background-color: purple;
   margin: auto;
   width: 11px;
   height: 11px;
