@@ -136,6 +136,13 @@ const QuizHistory = ({ quizId, questions }: { quizId: string; questions: IQuesti
     fetchData();
   }, []);
 
+  if (isLoading)
+    return (
+      <div className="gap-2 mt-10 flex items-center justify-center">
+        <Loading />
+      </div>
+    );
+
   return (
     <>
       {participants &&
