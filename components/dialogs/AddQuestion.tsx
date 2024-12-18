@@ -78,8 +78,8 @@ const AddQuestion = ({
     const splitOptions = pastedData
       .split("\n")
       .map((s: string) => {
-        // Remove any leading "a)", "b)", ..., "(1)", "(2)", etc.
-        return s.replace(/^(?:[a-d1-4]\)|\([a-d1-4]\))\s*/, "").trim();
+        // Remove any leading patterns like "a)", "(A)", "[a]", "A.", etc.
+        return s.replace(/^(?:[a-dA-D1-4]\)|\([a-dA-D1-4]\)|[a-dA-D]\.|[a-dA-D1-4]\]|\[[a-dA-D1-4]\])\s*/, "").trim();
       })
       .filter((s: string) => s !== "");
 
@@ -95,8 +95,10 @@ const AddQuestion = ({
     const pastedData = e.clipboardData.getData("text");
     const splitOptions = pastedData
       .split("\n")
-      // Remove any leading "a)", "b)", ..., "(1)", "(2)", etc.
-      .map((s: string) => s.replace(/^(?:[a-d1-4]\)|\([a-d1-4]\))\s*/, "").trim())
+      .map((s: string) => {
+        // Remove any leading patterns like "a)", "(A)", "[a]", "A.", etc.
+        return s.replace(/^(?:[a-dA-D1-4]\)|\([a-dA-D1-4]\)|[a-dA-D]\.|[a-dA-D1-4]\]|\[[a-dA-D1-4]\])\s*/, "").trim();
+      })
       .filter((s: string) => s !== "");
 
     if (splitOptions.length === 5) {
