@@ -78,8 +78,13 @@ const AddQuestion = ({
     const splitOptions = pastedData
       .split("\n")
       .map((s: string) => {
-        // Remove any leading patterns like "a)", "(A)", "[a]", "A.", etc.
-        return s.replace(/^(?:[a-dA-D1-4]\)|\([a-dA-D1-4]\)|[a-dA-D]\.|[a-dA-D1-4]\]|\[[a-dA-D1-4]\])\s*/, "").trim();
+        // Remove leading patterns like "1.", "- 1.", "a)", "- a)", "(A)", "[a]", "A.", etc.
+        return s
+          .replace(
+            /^(?:-?\s*[a-dA-D1-4]\)|-?\s*\([a-dA-D1-4]\)|-?\s*[a-dA-D1-4]\.|-?\s*[a-dA-D1-4]\]|\[-?\s*[a-dA-D1-4]\]|-?\s*\d\.)\s*/,
+            ""
+          )
+          .trim();
       })
       .filter((s: string) => s !== "");
 
@@ -96,12 +101,40 @@ const AddQuestion = ({
     const splitOptions = pastedData
       .split("\n")
       .map((s: string) => {
-        // Remove any leading patterns like "a)", "(A)", "[a]", "A.", etc.
-        return s.replace(/^(?:[a-dA-D1-4]\)|\([a-dA-D1-4]\)|[a-dA-D]\.|[a-dA-D1-4]\]|\[[a-dA-D1-4]\])\s*/, "").trim();
+        // Remove leading patterns like "1.", "- 1.", "a)", "- a)", "(A)", "[a]", "A.", etc.
+        return s
+          .replace(
+            /^(?:-?\s*[a-dA-D1-4]\)|-?\s*\([a-dA-D1-4]\)|-?\s*[a-dA-D1-4]\.|-?\s*[a-dA-D1-4]\]|\[-?\s*[a-dA-D1-4]\]|-?\s*\d\.)\s*/,
+            ""
+          )
+          .trim();
       })
       .filter((s: string) => s !== "");
 
     if (splitOptions.length === 5) {
+      e.preventDefault();
+      setTitle(splitOptions[0]);
+      setOptions(
+        splitOptions
+          .slice(1, 5)
+          .map((value: string, index: number) => ({ key: options[index].key, value, translatedValue: "" }))
+      );
+    }
+
+    if (splitOptions.length === 6) {
+      const answer = splitOptions[5]
+        .trim()
+        .toLowerCase()
+        .slice(-1)
+        .match(/^[a-dA-D1-4]$/)
+        ?.shift();
+
+      if (!answer) {
+        error("Invalid answer");
+      } else {
+        setAnswer(answer);
+      }
+
       e.preventDefault();
       setTitle(splitOptions[0]);
       setOptions(
