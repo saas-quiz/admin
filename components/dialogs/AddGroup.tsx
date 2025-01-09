@@ -15,9 +15,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { success } from "@/lib/utils";
 import { useDataStore } from "@/stores/data";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 export default function AddGroup({ fullWidth }: { fullWidth?: boolean }) {
+  const navigate = useRouter();
   const { groups, setGroups } = useDataStore();
   const [open, setOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
@@ -54,6 +56,7 @@ export default function AddGroup({ fullWidth }: { fullWidth?: boolean }) {
     setGroups(updatedGroups);
     success(res.message);
     setOpen(false);
+    navigate.push(`/group?id=${res.data.id}`);
   }
 
   return (

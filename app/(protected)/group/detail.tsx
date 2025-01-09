@@ -7,6 +7,7 @@ import { ReloadIcon } from "@radix-ui/react-icons";
 import { useRouter, redirect } from "next/navigation";
 import useSWR from "swr";
 import Loading from "@/components/shared/Loading";
+import DeleteGroup from "@/components/dialogs/DeleteGroup";
 
 const Detail = ({ id }: { id: string }) => {
   const router = useRouter();
@@ -23,14 +24,17 @@ const Detail = ({ id }: { id: string }) => {
     );
   }
 
-  if (!data || !data.ok) {
+  if (!data || !data.ok || !data.group) {
     error("No page found! Redirecting...", 1000);
     redirect("/");
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">{data.group.name}</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold tracking-tight">{data.group.name}</h1>
+        <DeleteGroup id={id} />
+      </div>
       <p>{data.group.desc}</p>
       <p className="text-xs text-muted-foreground">Created By: {data.group.admin.name}</p>
       <div className="grid grid-cols-[repeat(auto-fill,_minmax(200px,_1fr))] gap-4 my-5">
