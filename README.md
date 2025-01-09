@@ -1,6 +1,1 @@
 # Quiz Admin App
-
-.
-.
-.
-.
