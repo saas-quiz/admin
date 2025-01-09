@@ -1,7 +1,7 @@
 "use client";
 
 import { redirect } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { error } from "@/lib/utils";
 import { IOption, IQuestion, IQuiz, IQuizParticipant } from "@/types";
 import { getQuizDB } from "@/lib/actions/quiz.actions";
@@ -371,6 +371,54 @@ const Participant = ({ data, questions, index }: { data: IQuizParticipant; quest
     setResults(res);
   }, [data]);
 
+  const userInfoRef = useRef();
+  const contentRef = useRef();
+
+  const handleDownloadPdf = async () => {
+    if (contentRef.current) {
+      // Extract the HTML content of the element
+      // @ts-ignore
+      const userInfoHtml = userInfoRef.current.innerHTML;
+      // @ts-ignore
+      const elementHtml = contentRef.current.innerHTML;
+
+      const htmlContent = `
+      <html>
+        <head>
+          <script src="https://cdn.tailwindcss.com"></script>
+        </head>
+        <body>
+          <h1 class="text-3xl mb-1">Hello, ${data.User.name}</h1>
+          ${userInfoHtml}
+          <h1 class="text-xl mt-5">Results</h1>
+          ${elementHtml}
+        </body>
+      </html>
+    `;
+
+      const response = await fetch("/api/pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ html: htmlContent }),
+      });
+
+      if (response.ok) {
+        // Create a link to download the PDF
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${data.User.name}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } else {
+        console.error("Failed to generate PDF");
+      }
+    }
+  };
+
   return (
     <AccordionItem value={index + ""} className="flex flex-col">
       <AccordionTrigger className="p-2 hover:no-underline">
@@ -386,71 +434,83 @@ const Participant = ({ data, questions, index }: { data: IQuizParticipant; quest
       </AccordionTrigger>
       <AccordionContent>
         {data.anyReason && <p className="text-red-600 px-4 pb-2">Reason: {data.anyReason}</p>}
-        <div className="grid grid-cols-2 gap-1 px-4">
-          <p className="text-sm">
-            <span className="font-medium">Phone:</span> {data.User.phone}
-          </p>
-          <p className="text-sm">
-            <span className="font-medium">Email:</span> {data.User.email}
-          </p>
+        {/* @ts-ignore */}
+        <div ref={userInfoRef}>
+          <div className="grid grid-cols-2 gap-1 px-4">
+            <p className="text-sm">
+              <span className="font-medium">Phone:</span> {data.User.phone}
+            </p>
+            <p className="text-sm">
+              <span className="font-medium">Email:</span> {data.User.email}
+            </p>
 
-          <p className="text-sm">
-            <span className="font-medium">Question Answered:</span> {data.Answers.length}
-          </p>
-          <p className="text-sm">
-            <span className="font-medium">Not Answered:</span> {questions.length - data.Answers.length}
-          </p>
-          <p className="text-sm">
-            <span className="font-medium">Correct Answers:</span> {correctAnswers}
-          </p>
-          <p className="text-sm">
-            <span className="font-medium">Incorrect Answers:</span> {incorrectAnswers}
-          </p>
+            <p className="text-sm">
+              <span className="font-medium">Question Answered:</span> {data.Answers.length}
+            </p>
+            <p className="text-sm">
+              <span className="font-medium">Not Answered:</span> {questions.length - data.Answers.length}
+            </p>
+            <p className="text-sm">
+              <span className="font-medium">Correct Answers:</span> {correctAnswers}
+            </p>
+            <p className="text-sm">
+              <span className="font-medium">Incorrect Answers:</span> {incorrectAnswers}
+            </p>
 
-          <p className="text-sm">
-            <span className="font-medium">Submitted on:</span> {data.createdAt.toLocaleString()}
-          </p>
+            <p className="text-sm">
+              <span className="font-medium">Submitted on:</span> {data.createdAt.toLocaleString()}
+            </p>
+          </div>
         </div>
 
         <div className="mt-2">
-          <Button variant={"secondary"} size={"sm"} onClick={() => setShowResult(!showResult)}>
-            {showResult ? <ArrowUp className="h-3 w-3 mr-2" /> : <ArrowDown className="h-3 w-3 mr-2" />}{" "}
-            {showResult ? "Hide Result" : "Show Result"}
-          </Button>
+          <div className="flex">
+            <Button variant={"secondary"} size={"sm"} onClick={() => setShowResult(!showResult)}>
+              {showResult ? <ArrowUp className="h-3 w-3 mr-2" /> : <ArrowDown className="h-3 w-3 mr-2" />}{" "}
+              {showResult ? "Hide Result" : "Show Result"}
+            </Button>
+
+            <Button className="ml-auto" size="sm" onClick={handleDownloadPdf}>
+              Download PDF
+            </Button>
+          </div>
 
           <div className={`${showResult ? "block" : "hidden"} max-h-[300px] overflow-y-scroll mt-3`}>
-            {results.map((res, index) => (
-              <div
-                key={res.id}
-                className={`flex flex-col m-1 p-2 rounded-md ${
-                  res.isCorrect && res.isAttempted ? "bg-green-50" : res.isAttempted ? "bg-red-50" : "bg-gray-50"
-                }`}
-              >
-                <div className="flex gap-2 text-base font-medium">
-                  <span>{index + 1}.</span>
-                  <div>
-                    <p>{res.title}</p>
+            {/* @ts-ignore */}
+            <div ref={contentRef} className="mx-auto max-w-[1020px]">
+              {results.map((res, index) => (
+                <div
+                  key={res.id}
+                  className={`flex flex-col m-1 p-2 rounded-md ${
+                    res.isCorrect && res.isAttempted ? "bg-green-50" : res.isAttempted ? "bg-red-50" : "bg-gray-50"
+                  }`}
+                >
+                  <div className="flex gap-2 text-base font-medium">
+                    <span>{index + 1}.</span>
+                    <div>
+                      <p>{res.title}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-1">
+                    {res.options
+                      .sort((a, b) => a.key.localeCompare(b.key))
+                      .map((option, index) => (
+                        <div key={option.id} className="flex items-start gap-2 text-sm">
+                          <div>({option.key})</div>
+                          {res.correctAnswer === option.key && <CheckCircle className="h-4 w-4 text-green-600 mt-[3px]" />}
+                          {res.userAnswer !== res.correctAnswer && res.userAnswer === option.key && (
+                            <XCircle className="h-4 w-4 text-red-500  mt-[3px]" />
+                          )}
+                          <div className="mt-[2px]">
+                            <p className="leading-4">{option.value}</p>
+                            <p className="text-xs leading-[18px] mt-1">{option.translatedValue}</p>
+                          </div>
+                        </div>
+                      ))}
                   </div>
                 </div>
-                <div className="grid grid-cols-1 xs:grid-cols-2 gap-1">
-                  {res.options
-                    .sort((a, b) => a.key.localeCompare(b.key))
-                    .map((option, index) => (
-                      <div key={option.id} className="flex items-start gap-2 text-sm">
-                        <div>({option.key})</div>
-                        {res.correctAnswer === option.key && <CheckCircle className="h-4 w-4 text-green-600 mt-[3px]" />}
-                        {res.userAnswer !== res.correctAnswer && res.userAnswer === option.key && (
-                          <XCircle className="h-4 w-4 text-red-500  mt-[3px]" />
-                        )}
-                        <div className="mt-[2px]">
-                          <p className="leading-4">{option.value}</p>
-                          <p className="text-xs leading-[18px] mt-1">{option.translatedValue}</p>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </AccordionContent>

@@ -40,6 +40,7 @@
     "next-auth": "5.0.0-beta.22",
     "nodemailer": "^6.9.15",
     "prisma": "^5.20.0",
+    "puppeteer": "^23.11.1",
     "react": "^18",
     "react-day-picker": "8.10.1",
     "react-dom": "^18",
