@@ -23,7 +23,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import Loading from "@/components/shared/Loading";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowDown, ArrowUp, CalendarDays, CheckCircle, ChevronDown, XCircle } from "lucide-react";
+import { ArrowDown, ArrowUp, CalendarDays, CheckCircle, ChevronDown, Download, Loader2, XCircle } from "lucide-react";
 import { convertJsonToCsv, downloadFile } from "@/lib/download";
 
 const Page = ({ searchParams }: { searchParams: { id: string } }) => {
@@ -323,6 +323,7 @@ const Participant = ({ data, questions, index }: { data: IQuizParticipant; quest
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [results, setResults] = useState<
     {
       id: string;
@@ -396,6 +397,7 @@ const Participant = ({ data, questions, index }: { data: IQuizParticipant; quest
       </html>
     `;
 
+      setIsDownloading(true);
       const response = await fetch("/api/pdf", {
         method: "POST",
         headers: {
@@ -416,6 +418,7 @@ const Participant = ({ data, questions, index }: { data: IQuizParticipant; quest
       } else {
         console.error("Failed to generate PDF");
       }
+      setIsDownloading(false);
     }
   };
 
@@ -470,8 +473,9 @@ const Participant = ({ data, questions, index }: { data: IQuizParticipant; quest
               {showResult ? "Hide Result" : "Show Result"}
             </Button>
 
-            <Button className="ml-auto" size="sm" onClick={handleDownloadPdf}>
-              Download PDF
+            <Button className="ml-auto" size="sm" onClick={handleDownloadPdf} disabled={isDownloading}>
+              {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+              {isDownloading ? "Downloading..." : "Download PDF"}
             </Button>
           </div>
 
