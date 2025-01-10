@@ -37,7 +37,7 @@ export default async function RootLayout({
               <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
                 <Link href="/" className="flex items-center gap-2 font-semibold">
                   <SiPlatformdotsh className="h-4 w-4" />
-                  <span className="">Quiz App</span>
+                  <span className="">Quiz App.</span>
                 </Link>
               </div>
               <Sidenav />
