@@ -51,8 +51,9 @@ export function UserNav({ session }: { session: Session }) {
         <DropdownMenuSeparator /> */}
         <DropdownMenuItem
           onClick={() => {
-            console.log("object");
-            signOut({ redirectTo: "/sign-in" });
+            signOut({
+              redirectTo: process.env.NODE_ENV === "production" ? `${process.env.NEXT_PUBLIC_APP_URL}/sign-in` : "/sign-in",
+            });
           }}
           className="cursor-pointer"
         >
