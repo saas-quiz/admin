@@ -74,6 +74,7 @@ export interface IQuizParticipant {
   groupId: string;
   isQualified: boolean;
   anyReason?: string;
+  sentEmailId?: string;
   User: IUser;
   Quiz: IQuiz;
   Group?: IGroup;

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
-import { error } from "@/lib/utils";
+import { error, success } from "@/lib/utils";
 import { IOption, IQuestion, IQuiz, IQuizParticipant } from "@/types";
 import { getQuizDB } from "@/lib/actions/quiz.actions";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ArrowDown, ArrowUp, CalendarDays, CheckCircle, ChevronDown, Download, Loader2, XCircle } from "lucide-react";
 import { convertJsonToCsv, downloadFile } from "@/lib/download";
+import { SiGmail } from "react-icons/si";
+import { successResultWithNote } from "@/lib/templates/success-result-with-note";
 
 const Page = ({ searchParams }: { searchParams: { id: string } }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -119,6 +121,17 @@ const QuizHistory = ({ quizId, questions }: { quizId: string; questions: IQuesti
   const [isLoading, setIsLoading] = useState(false);
   const [participants, setParticipants] = useState<{ [key: string]: IQuizParticipant[] }>({});
 
+  const handleUpdateParticipant = (date: string, id: string, key: string, value: string) => {
+    const participant = participants[date].find((participant) => participant.id === id);
+    if (!participant) return;
+    const newParticipant = { ...participant, [key]: value };
+    const newParticipants = {
+      ...participants,
+      [date]: [...participants[date].filter((participant) => participant.id !== id), newParticipant],
+    };
+    setParticipants(newParticipants);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -162,7 +175,13 @@ const QuizHistory = ({ quizId, questions }: { quizId: string; questions: IQuesti
                 </span>
               </AccordionTrigger>
               <AccordionContent>
-                <QuizParticipants quizId={quizId} questions={questions} participants={participants[date]} />
+                <QuizParticipants
+                  quizId={quizId}
+                  questions={questions}
+                  participants={participants[date]}
+                  date={date}
+                  cb={handleUpdateParticipant}
+                />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -175,10 +194,14 @@ const QuizParticipants = ({
   quizId,
   questions,
   participants,
+  date,
+  cb,
 }: {
   quizId: string;
   questions: IQuestion[];
   participants: IQuizParticipant[];
+  date: string;
+  cb: (date: string, id: string, key: string, value: string) => void;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -312,18 +335,32 @@ const QuizParticipants = ({
 
       <Accordion type="multiple">
         {shortedParticipants.map((participant, index) => (
-          <Participant key={participant.id} data={participant} questions={questions} index={index} />
+          <Participant key={participant.id} data={participant} questions={questions} index={index} date={date} cb={cb} />
         ))}
       </Accordion>
     </div>
   );
 };
 
-const Participant = ({ data, questions, index }: { data: IQuizParticipant; questions: IQuestion[]; index: number }) => {
+const Participant = ({
+  data,
+  questions,
+  index,
+  date,
+  cb,
+}: {
+  data: IQuizParticipant;
+  questions: IQuestion[];
+  index: number;
+  date: string;
+  cb: (date: string, id: string, key: string, value: string) => void;
+}) => {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+
   const [results, setResults] = useState<
     {
       id: string;
@@ -422,6 +459,49 @@ const Participant = ({ data, questions, index }: { data: IQuizParticipant; quest
     }
   };
 
+  const handleSendEmail = async () => {
+    try {
+      setIsSendingEmail(true);
+      const name = data.User.name;
+      const email = data.User.email;
+
+      const emailBody = {
+        to: [{ name, address: email }],
+        subject: "Results",
+        body: {
+          html: successResultWithNote({
+            name,
+            email,
+            totalQuestions: questions.length,
+            attemptedQuestions: data.Answers.length,
+            correctAnswers,
+          }),
+        },
+        participantId: data.id,
+      };
+
+      const response = await fetch("/api/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(emailBody),
+      }).then((res) => res.json());
+
+      if (!response.ok) {
+        return error(response.error);
+      }
+
+      cb(date, data.id, "sentEmailId", response.data.messageId || "");
+      success("Email sent successfully");
+    } catch (err) {
+      console.error(err);
+      error("Something went wrong");
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
   return (
     <AccordionItem value={index + ""} className="flex flex-col">
       <AccordionTrigger className="p-2 hover:no-underline">
@@ -477,6 +557,25 @@ const Participant = ({ data, questions, index }: { data: IQuizParticipant; quest
               {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
               {isDownloading ? "Downloading..." : "Download PDF"}
             </Button>
+
+            {data.sentEmailId ? (
+              <div>
+                {/* <span className="text-sm text-green-600">Email Sent</span> */}
+                <Button
+                  variant={"secondary"}
+                  size={"sm"}
+                  className="ml-2"
+                  onClick={handleSendEmail}
+                  disabled={isSendingEmail}
+                >
+                  <SiGmail className="mr-2 h-4 w-4" /> {isSendingEmail ? "Sending..." : "Resend Email"}
+                </Button>
+              </div>
+            ) : (
+              <Button size={"sm"} className="ml-2" onClick={handleSendEmail} disabled={isSendingEmail}>
+                <SiGmail className="mr-2 h-4 w-4" /> {isSendingEmail ? "Sending..." : "Send Email"}
+              </Button>
+            )}
           </div>
 
           <div className={`${showResult ? "block" : "hidden"} max-h-[300px] overflow-y-scroll mt-3`}>
