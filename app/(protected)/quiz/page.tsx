@@ -467,7 +467,7 @@ const Participant = ({
 
       const emailBody = {
         to: [{ name, address: email }],
-        subject: "Results",
+        subject: "Congratulations! You Have Qualified for Level 2 at Excelling Technologies",
         body: {
           html: successResultWithNote({
             name,
