@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { toast } from "../ui/use-toast";
@@ -78,6 +78,12 @@ const GenerateQuestions = ({ quizId }: { quizId: string }) => {
   const handleDeleteQuestion = (questionId: string) => {
     setQuizData((prevData) => prevData.filter((question) => question.id !== questionId));
   };
+
+  useEffect(() => {
+    if (difficulty && numQuestions && topic) {
+      setButtonText("Re-Generate");
+    }
+  }, [difficulty, numQuestions, topic]);
 
   return (
     <>
