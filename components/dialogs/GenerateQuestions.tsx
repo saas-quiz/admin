@@ -47,10 +47,10 @@ const GenerateQuestions = ({ quizId }: { quizId: string }) => {
 
     if (data && data.questions && data.questions.length > 0) {
       setQuizData(data.questions);
+      setButtonText("Add all questions");
     }
 
     setIsGenerating(false);
-    setButtonText("Add all questions");
   };
 
   const handleAddAllQuestions = async () => {
