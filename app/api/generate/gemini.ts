@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI("AIzaSyA-EAKrYCkyh0vMWPuTas9EoJx6upVGq48");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export const generateQuestions = async ({ topic, difficulty, numQuestions }: any) => {
   const prompt = `
