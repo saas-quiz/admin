@@ -81,7 +81,7 @@ const GenerateQuestions = ({ quizId }: { quizId: string }) => {
 
   useEffect(() => {
     if (difficulty && numQuestions && topic) {
-      setButtonText("Re-Generate");
+      setButtonText("Generate");
     }
   }, [difficulty, numQuestions, topic]);
 
