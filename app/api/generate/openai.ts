@@ -2,7 +2,7 @@
 
 // const openai = new OpenAI({
 //   apiKey:
-//     "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",
+//     "",
 // });
 
 // export const generateQuestions = async () => {
