@@ -8,6 +8,7 @@ import { Trash2Icon } from "lucide-react";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { addQuestionDB } from "@/lib/actions/quiz.actions";
 import { Label } from "../ui/label";
+import { GiStarFormation } from "react-icons/gi";
 
 const GenerateQuestions = ({ quizId }: { quizId: string }) => {
   const [open, setOpen] = useState(false);
@@ -89,7 +90,8 @@ const GenerateQuestions = ({ quizId }: { quizId: string }) => {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild className="w-fit">
-          <Button type="button" size={"sm"}>
+          <Button type="button" size={"sm"} className="group">
+            <GiStarFormation className="w-4 h-4 mr-2 group-hover:rotate-180 duration-500" />
             Generate AI Questions
           </Button>
         </DialogTrigger>
